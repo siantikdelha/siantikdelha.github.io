@@ -107,7 +107,7 @@
                 <i class="fa-solid fa-print"></i> <span class="hidden sm:inline">Seting Printer 80mm</span>
             </button>
             <button onclick="switchView('kiosk')" id="nav-kiosk" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] md:text-xs flex items-center gap-1 shadow-sm">
-                <i class="fa-solid fa-tablet-screen-button"></i> Kiosk Pasien
+                <i class="fa-solid fa-tablet-screen-button"></i> Pasien
             </button>
             <button onclick="switchView('admin')" id="nav-admin" class="px-3 py-1.5 rounded-lg bg-slate-700 text-slate-200 font-bold text-[10px] md:text-xs flex items-center gap-1 hover:bg-slate-600 transition">
                 <i class="fa-solid fa-sliders"></i> Panel Operator
@@ -135,7 +135,7 @@
                     </div>
                     <div>
                         <h1 class="text-white text-lg md:text-2xl font-black uppercase tracking-wider leading-none">SIANTIK DELHA</h1>
-                        <p class="text-emerald-300 text-[9px] md:text-[10px] font-bold tracking-widest mt-0.5 uppercase">SILAKAN SENTUH TOMBOL POLI DI BAWAH UNTUK MENGAMBIL TIKET</p>
+                        <p class="text-emerald-300 text-[9px] md:text-[10px] font-bold tracking-widest mt-0.5 uppercase">PILIH POLI UNTUK MENGAMBIL ANTREAN</p>
                     </div>
                 </div>
 
@@ -682,7 +682,8 @@
                 const formattedNumStr = num.toString().padStart(3, '0');
                 const spellLetters = prefix + ' ' + formattedNumStr.split('').map(d => d === '0' ? 'kosong' : d).join(' ');
                 
-                const utterance = new SpeechSynthesisUtterance(`Nomor antrean, ${spellLetters}, silahkan ke, loket pendaftaran.`);
+                // MENGUBAH TEKS PANGGILAN DISINI
+                const utterance = new SpeechSynthesisUtterance(`Nomor antrean, ${spellLetters}, silahkan menuju ke, loket pendaftaran.`);
                 utterance.lang = 'id-ID';
                 utterance.rate = 0.85;
 
