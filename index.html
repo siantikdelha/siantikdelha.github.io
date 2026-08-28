@@ -10,9 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase Realtime Database SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <!-- Firebase Realtime Database SDK (Compat v8 / v9 stable) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         body { 
@@ -121,6 +121,7 @@
 
     <main class="flex-grow w-full flex flex-col items-center justify-center p-2 md:p-3 max-w-[1400px] mx-auto print:hidden">
         
+        <!-- KIOSK VIEW -->
         <div id="view-kiosk" class="w-full flex flex-col h-[calc(100vh-60px)] justify-between gap-2 animate-fade-in">
             
             <div class="w-full bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 rounded-xl py-2 px-4 flex flex-row items-center justify-between shadow-lg border border-emerald-500/30">
@@ -172,7 +173,7 @@
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">POLI DEWASA</span>
-                        <span id="sub-DEWASA" data-original="POLI UMUM DEWASA" class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-blue-100 bg-black/25 block">POLI UMUM DEWASA</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-blue-100 bg-black/25 block">POLI UMUM DEWASA</span>
                     </div>
                 </button>
 
@@ -182,7 +183,7 @@
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">POLI ANAK</span>
-                        <span id="sub-ANAK" data-original="KESEHATAN ANAK" class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-orange-100 bg-black/25 block">KESEHATAN ANAK</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-orange-100 bg-black/25 block">KESEHATAN ANAK</span>
                     </div>
                 </button>
 
@@ -192,7 +193,7 @@
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">POLI KIA</span>
-                        <span id="sub-KIA" data-original="KESEHATAN IBU & ANAK" class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-pink-100 bg-black/25 block">KESEHATAN IBU & ANAK</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-pink-100 bg-black/25 block">KESEHATAN IBU & ANAK</span>
                     </div>
                 </button>
 
@@ -202,7 +203,7 @@
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">POLI KB</span>
-                        <span id="sub-KB" data-original="KELUARGA BERENCANA" class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-purple-100 bg-black/25 block">KELUARGA BERENCANA</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-purple-100 bg-black/25 block">KELUARGA BERENCANA</span>
                     </div>
                 </button>
 
@@ -212,7 +213,7 @@
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">POLI GIGI</span>
-                        <span id="sub-GIGI" data-original="KESEHATAN GIGI & MULUT" class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-emerald-100 bg-black/25 block">KESEHATAN GIGI & MULUT</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-emerald-100 bg-black/25 block">KESEHATAN GIGI & MULUT</span>
                     </div>
                 </button>
 
@@ -222,7 +223,7 @@
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">KONSELING</span>
-                        <span id="sub-KONSELING" data-original="KONSULTASI KLINIK" class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-amber-100 bg-black/25 block">KONSULTASI KLINIK</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-amber-100 bg-black/25 block">KONSULTASI KLINIK</span>
                     </div>
                 </button>
 
@@ -232,17 +233,18 @@
                     </div>
                     <div class="text-left">
                         <span class="text-xl md:text-2xl font-black uppercase tracking-wider block">IGD 24 JAM</span>
-                        <span id="sub-IGD" data-original="INSTALASI GAWAT DARURAT" class="text-[10px] font-bold mt-0.5 px-2.5 py-0.5 rounded-full text-red-100 bg-black/30 inline-block">INSTALASI GAWAT DARURAT</span>
+                        <span class="text-[10px] font-bold mt-0.5 px-2.5 py-0.5 rounded-full text-red-100 bg-black/30 inline-block">INSTALASI GAWAT DARURAT</span>
                     </div>
                 </button>
             </div>
 
             <div class="w-full bg-slate-950 text-slate-400 text-[10px] py-1 px-3 rounded-lg flex justify-between items-center border border-slate-800">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-emerald-400"></i> Harap simpan cetakan struk nomor antrean.</span>
-                <span class="text-slate-500 font-mono">AINUO802 Ready • Ver 2.5.1 (Fixed)</span>
+                <span class="text-slate-500 font-mono">AINUO802 Ready • Ver 2.6</span>
             </div>
         </div>
 
+        <!-- ADMIN VIEW -->
         <div id="view-admin" class="w-full hidden flex-col gap-4 animate-fade-in py-2">
             <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
                 <div>
@@ -252,7 +254,7 @@
                 </div>
                 <div class="flex gap-2 flex-wrap justify-end items-center">
                     <div class="flex items-center gap-2 bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-700 text-xs shadow-inner">
-                        <button onclick="toggleVideoMute()" id="admin-mute-btn" class="text-indigo-400 hover:text-indigo-300 text-sm transition">
+                        <button onclick="toggleVideoMute()" class="text-indigo-400 hover:text-indigo-300 text-sm transition">
                             <i class="fa-solid fa-volume-high" id="admin-mute-icon"></i>
                         </button>
                         <input type="range" id="admin-volume-slider" min="0" max="100" value="50" oninput="setVideoVolume(this.value)" class="w-16 sm:w-20 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
@@ -286,6 +288,7 @@
             </div>
         </div>
 
+        <!-- TV VIEW -->
         <div id="view-tv" class="hidden w-full min-h-screen bg-slate-950 absolute top-0 left-0 z-50 flex-col print:hidden">
             <div class="bg-slate-900 text-white px-6 py-3 flex justify-between items-center shadow-md border-b border-slate-800 h-[80px]">
                 <div class="flex items-center gap-3">
@@ -351,8 +354,8 @@
     <div id="receipt-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
         <div class="bg-slate-800 rounded-2xl p-5 shadow-2xl max-w-sm w-full text-center border border-slate-700">
             <div class="flex justify-center text-emerald-400 text-4xl mb-2"><i class="fa-solid fa-circle-check animate-bounce"></i></div>
-            <h3 class="font-bold text-lg text-white">Tiket Berhasil Diambil!</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Memproses pencetakan...</p>
+            <h3 class="font-bold text-lg text-white">Tiket Sedang Dicetak!</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Meneruskan ke RawBT</p>
             
             <div class="border border-slate-300 rounded-lg p-4 bg-white my-3 text-left font-mono text-slate-900 shadow-inner">
                 <div class="text-center pb-2 border-b border-dashed border-slate-400">
@@ -378,10 +381,10 @@
     <div id="printer-guide-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
         <div class="bg-slate-800 rounded-2xl p-5 shadow-2xl max-w-md w-full border border-slate-700 text-slate-200">
             <h3 class="font-bold text-base text-amber-300 mb-3"><i class="fa-solid fa-print"></i> Info AINUO802 (80mm) & RawBT</h3>
-            <p class="text-xs text-slate-300 mb-2">Aplikasi telah dikonfigurasi menggunakan standar Cetak Web (HTML/CSS).</p>
+            <p class="text-xs text-slate-300 mb-2">Sistem ini sudah dioptimasi menggunakan ESC/POS untuk ukuran besar di RawBT.</p>
             <ul class="list-disc pl-4 text-xs text-slate-400 space-y-1 mb-4">
-                <li>Aktifkan <strong>RawBT Print Service</strong> di pengaturan printer bawaan HP Android Anda.</li>
-                <li>Set ukuran kertas menjadi <strong>80mm</strong> di aplikasi RawBT.</li>
+                <li>Nomor antrean dan nama poli dicetak besar/tebal, sedangkan header Puskesmas kembali ke ukuran normal.</li>
+                <li>Pastikan driver/mode RawBT mendukung perintah ESC/POS standar.</li>
             </ul>
             <button onclick="tutupPetunjukPrinter()" class="w-full py-2 bg-amber-500 text-slate-950 rounded-lg font-bold text-xs">Tutup</button>
         </div>
@@ -398,46 +401,35 @@
         </div>
     </div>
 
-    <div id="print-container" class="hidden print:block">
-        <div style="text-align: center; margin-bottom: 10px;">
-            <h2 style="font-size: 18px; font-weight: bold; margin: 0; font-family: 'Courier New', Courier, monospace;">PUSKESMAS DELHA</h2>
-            <p style="font-size: 12px; margin: 0; font-family: 'Courier New', Courier, monospace;">KABUPATEN ROTE NDAO</p>
-        </div>
-        <div style="border-top: 2px dashed black; margin: 10px 0;"></div>
-        <div style="text-align: center;">
-            <p style="font-size: 14px; margin: 0;">NOMOR ANTREAN</p>
-            <h1 id="print-ticket-num" style="font-size: 54px; font-weight: bold; margin: 5px 0; font-family: sans-serif;">---</h1>
-            <h3 id="print-ticket-poli" style="font-size: 20px; font-weight: bold; margin: 0;">---</h3>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 15px;">
-            <span id="print-ticket-date">--/--/----</span>
-            <span id="print-ticket-time">--:--</span>
-        </div>
-        <div style="border-top: 2px dashed black; margin: 10px 0;"></div>
-        <div style="text-align: center; font-size: 12px;">
-        <p style="margin: 0;">Mohon tunggu sampai</p>
-        <p style="margin: 0;">nomor Anda dipanggil.</p>
-        <p style="margin-top: 10px; font-weight: bold;">Terima Kasih</p>
-    </div>
-</div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhK5GK2vrxirZpPM1JAH3MEQwpeS8SPMg",
+            authDomain: "aplikasi-siantik-delha.firebaseapp.com",
+            databaseURL: "https://aplikasi-siantik-delha-default-rtdb.firebaseio.com",
+            projectId: "aplikasi-siantik-delha",
+            storageBucket: "aplikasi-siantik-delha.firebasestorage.app",
+            messagingSenderId: "34647008178",
+            appId: "1:34647008178:web:e36dc5184c74e372f3faab",
+            measurementId: "G-6NKK7FXD24"
+        };
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyAhK5GK2vrxirZpPM1JAH3MEQwpeS8SPMg",
-        authDomain: "siantik-delha-2-default-rtdb.firebaseapp.com",
-        databaseURL: "https://siantik-delha-2-default-rtdb.firebaseio.com",
-        projectId: "siantik-delha-2",
-        storageBucket: "siantik-delha-2.firebasestorage.app",
-        messagingSenderId: "34647008178",
-        appId: "1:34647008178:web:e36dc5184c74e372f3faab",
-        measurementId: "G-6NKK7FXD24"
-    };
+        // Initialize Firebase safely with fallback to LocalStorage if permission_denied occurs
+        let db = null;
+        let queueRef = null;
+        let useLocalStorageMode = false;
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const queueRef = db.ref('queueState');
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+            queueRef = db.ref('queueState');
+        } catch (e) {
+            console.warn("Firebase initialization failed, switching to LocalStorage mode:", e);
+            useLocalStorageMode = true;
+        }
 
-    let queueState = {
+        let queueState = {
             globalCounter: 0,
             activeCalling: { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
             history: [],
@@ -462,44 +454,83 @@
             IGD: { prefix: 'I', name: 'IGD', color: 'bg-red-600', tvColor: 'bg-red-700' }
         };
 
-        queueRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                queueState = {
-                    globalCounter: data.globalCounter || 0,
-                    activeCalling: data.activeCalling || { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
-                    // PERBAIKAN 4: Di-sortir otomatis menggunakan fungsi .sort
-                    history: data.history ? Object.values(data.history).sort((a, b) => b.id - a.id) : [],
-                    lastCalled: data.lastCalled || { id: null, ticket: null, poli: null, timestamp: null },
-                    videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
-                    videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
-                };
+        function initQueueSync() {
+            if (useLocalStorageMode) {
+                loadFromLocalStorage();
+                return;
             }
-            
-            renderAdminPanel();
-            renderHistoryLog();
-            
-            if (currentViewMode === 'tv') {
+
+            queueRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    queueState = {
+                        globalCounter: data.globalCounter || 0,
+                        activeCalling: data.activeCalling || { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
+                        history: data.history ? Object.values(data.history) : [],
+                        lastCalled: data.lastCalled || { id: null, ticket: null, poli: null, timestamp: null },
+                        videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
+                        videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
+                    };
+                }
+                
+                renderAdminPanel();
+                renderHistoryLog();
                 renderTVGrid();
-                if (queueState.lastCalled.timestamp && queueState.lastCalled.timestamp !== lastPlayedTimestamp) {
+                
+                if (queueState.lastCalled && queueState.lastCalled.timestamp && queueState.lastCalled.timestamp !== lastPlayedTimestamp) {
                     lastPlayedTimestamp = queueState.lastCalled.timestamp;
                     if(isTVModeActive) {
                         triggerTVCall(queueState.lastCalled);
                     }
                 }
-            }
-        });
-
-        function saveToCloud() {
-            queueRef.set(queueState);
+            }, (error) => {
+                console.warn("Firebase read error, falling back to LocalStorage:", error);
+                useLocalStorageMode = true;
+                loadFromLocalStorage();
+            });
         }
 
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('siantik_queue_state');
+            if (saved) {
+                try {
+                    queueState = JSON.parse(saved);
+                } catch(e) { console.error(e); }
+            }
+            updateUIAfterStateChange();
+        }
+
+        function saveToCloud() {
+            if (useLocalStorageMode) {
+                localStorage.setItem('siantik_queue_state', JSON.stringify(queueState));
+                updateUIAfterStateChange();
+                return;
+            }
+
+            queueRef.set(queueState).catch((error) => {
+                console.warn("Firebase write permission denied. Switching to LocalStorage mode automatically.", error);
+                useLocalStorageMode = true;
+                localStorage.setItem('siantik_queue_state', JSON.stringify(queueState));
+                updateUIAfterStateChange();
+            });
+        }
+
+        function updateUIAfterStateChange() {
+            renderAdminPanel();
+            renderHistoryLog();
+            renderTVGrid();
+            if (queueState.lastCalled && queueState.lastCalled.timestamp && queueState.lastCalled.timestamp !== lastPlayedTimestamp) {
+                lastPlayedTimestamp = queueState.lastCalled.timestamp;
+                if(isTVModeActive) {
+                    triggerTVCall(queueState.lastCalled);
+                }
+            }
+        }
+
+        // Initialize sync on load
+        initQueueSync();
+
         function isLayananTerbuka() {
-            // PERBAIKAN 3: Override Jam Pelayanan, Dibuka 24 Jam untuk Testing. 
-            // Jika Anda ingin mengembalikan fitur jam kerja, hapus baris "return true;" di bawah ini.
-            return true; 
-            
-            /*
             const skrg = new Date();
             const hari = skrg.getDay(); 
             const jam = skrg.getHours();
@@ -508,7 +539,6 @@
             if (hari === 5 && jam >= 7 && jam < 10) return true;            // Jum
             if (hari === 6 && jam >= 7 && jam < 11) return true;            // Sab
             return false;
-            */
         }
 
         function updateClock() {
@@ -516,10 +546,15 @@
             const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
-            document.getElementById('kiosk-live-date').innerText = dateStr;
-            document.getElementById('kiosk-live-time').innerText = timeStr;
-            document.getElementById('tv-live-date').innerText = dateStr;
-            document.getElementById('tv-live-time').innerText = timeStr;
+            const kd = document.getElementById('kiosk-live-date');
+            const kt = document.getElementById('kiosk-live-time');
+            const td = document.getElementById('tv-live-date');
+            const tt = document.getElementById('tv-live-time');
+            
+            if(kd) kd.innerText = dateStr;
+            if(kt) kt.innerText = timeStr;
+            if(td) td.innerText = dateStr;
+            if(tt) tt.innerText = timeStr;
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -534,8 +569,41 @@
                 return;
             }
 
-            queueState.globalCounter++;
-            const globalTicketNum = queueState.globalCounter;
+            if (useLocalStorageMode) {
+                processTicketLocally(catName, prefix);
+                return;
+            }
+
+            queueRef.transaction((currentData) => {
+                if (currentData === null) {
+                    return {
+                        globalCounter: 1,
+                        activeCalling: { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
+                        history: [],
+                        lastCalled: { id: null, ticket: null, poli: null, timestamp: null }
+                    };
+                }
+                currentData.globalCounter = (currentData.globalCounter || 0) + 1;
+                return currentData;
+            }, (error, committed, snapshot) => {
+                if (error) {
+                    console.warn("Transaction permission denied, falling back to local ticket creation:", error);
+                    useLocalStorageMode = true;
+                    processTicketLocally(catName, prefix);
+                } else if (committed) {
+                    const data = snapshot.val();
+                    finalizeTicketCreation(catName, prefix, data.globalCounter);
+                }
+            });
+        }
+
+        function processTicketLocally(catName, prefix) {
+            queueState.globalCounter = (queueState.globalCounter || 0) + 1;
+            finalizeTicketCreation(catName, prefix, queueState.globalCounter);
+            saveToCloud();
+        }
+
+        function finalizeTicketCreation(catName, prefix, globalTicketNum) {
             const formatNum = prefix + '-' + globalTicketNum.toString().padStart(3, '0');
             
             const skrg = new Date();
@@ -543,7 +611,7 @@
             const timeStr = skrg.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
             const tiketBaru = {
-                id: Date.now(),
+                id: Date.now() + Math.random(),
                 category: catName,
                 prefix: prefix,
                 num: globalTicketNum,
@@ -554,33 +622,61 @@
                 status: 'Menunggu'
             };
 
+            if (!queueState.history) {
+                queueState.history = [];
+            }
             queueState.history.unshift(tiketBaru);
 
-            // Menyimpan ke cloud dan memicu cetak
-            queueRef.set(queueState).then(() => {
-                // Tampilkan Modal Struk di Layar HP/Tablet
-                document.getElementById('modal-ticket-num').innerText = formatNum;
-                document.getElementById('modal-ticket-category').innerText = categories[catName].name;
-                document.getElementById('modal-ticket-date').innerText = dateStr;
-                document.getElementById('modal-ticket-time').innerText = timeStr;
-                document.getElementById('receipt-modal').classList.remove('hidden');
+            if (!useLocalStorageMode) {
+                queueRef.set(queueState);
+            } else {
+                saveToCloud();
+            }
 
-                // Siapkan data di kontainer khusus cetak (print-container)
-                document.getElementById('print-ticket-num').innerText = formatNum;
-                document.getElementById('print-ticket-poli').innerText = categories[catName].name.toUpperCase();
-                document.getElementById('print-ticket-date').innerText = dateStr;
-                document.getElementById('print-ticket-time').innerText = timeStr;
+            document.getElementById('modal-ticket-num').innerText = formatNum;
+            document.getElementById('modal-ticket-category').innerText = categories[catName].name;
+            document.getElementById('modal-ticket-date').innerText = dateStr;
+            document.getElementById('modal-ticket-time').innerText = timeStr;
+            document.getElementById('receipt-modal').classList.remove('hidden');
 
-                // Eksekusi pemanggilan print bawaan browser
-                // Saat dialog print muncul di Android, RawBT yang diset sebagai Print Service 
-                // akan menangkap layout HTML/CSS ini dan mencetaknya secara rapi tanpa kode aneh.
-                setTimeout(() => {
-                    window.print();
-                }, 500);
-            }).catch((error) => {
-                alert("Gagal terhubung ke Cloud! Pastikan internet aktif dan Rules Firebase sudah dibuat 'true'.");
-                console.error("Firebase Update Error: ", error);
-            });
+            const ESC = "\x1B";
+            const GS = "\x1D";
+            const alignCenter = ESC + "a" + "\x01";
+            const alignLeft = ESC + "a" + "\x00";
+            const boldOn = ESC + "E" + "\x01";
+            const boldOff = ESC + "E" + "\x00";
+            const hugeSize = GS + "!" + "\x33";
+            const mediumSize = GS + "!" + "\x11";
+            const normalSize = GS + "!" + "\x00";
+
+            const lineDivider = "------------------------------------------------";
+            const poliName = categories[catName].name.toUpperCase();
+            
+            const rawbtText = 
+                ESC + "@" +
+                alignCenter +
+                normalSize + boldOn +
+                "PUSKESMAS DELHA\n" +
+                "KABUPATEN ROTE NDAO\n\n" +
+                normalSize + boldOff +
+                "NOMOR ANTREAN\n\n" +
+                hugeSize + boldOn +
+                formatNum + "\n\n" +
+                mediumSize + boldOn +
+                poliName + "\n\n" +
+                normalSize + boldOff +
+                alignLeft +
+                dateStr + "                       " + timeStr + "\n" +
+                alignCenter +
+                lineDivider + "\n" +
+                "Mohon tunggu sampai\n" +
+                "nomor Anda dipanggil.\n\n" +
+                "Terima Kasih\n\n\n\n";
+
+            setTimeout(() => {
+                const rawbtUrl = 'rawbt:' + encodeURIComponent(rawbtText);
+                window.location.href = rawbtUrl;
+            }, 400);
         }
 
         function panggilLayanan(key, ticketId, isRepeat = false) {
@@ -623,7 +719,7 @@
                 const sisaAntrian = queueState.history.filter(item => item.category === key && item.status === 'Menunggu').length;
 
                 const waitingTickets = queueState.history.filter(item => item.category === key && item.status === 'Menunggu');
-                const nextTicket = waitingTickets[waitingTickets.length - 1]; 
+                const nextTicket = waitingTickets.length > 0 ? waitingTickets[waitingTickets.length - 1] : null; 
                 const nextTicketId = nextTicket ? nextTicket.id : null;
 
                 const activeTicket = queueState.history.find(item => item.formatted === currentlyServed);
@@ -688,7 +784,7 @@
             Object.keys(categories).forEach(key => {
                 const cat = categories[key];
                 const currentTicket = queueState.activeCalling[key] || '---';
-                const isCurrentlyCalled = (queueState.lastCalled.poliKey === key);
+                const isCurrentlyCalled = (queueState.lastCalled && queueState.lastCalled.poliKey === key);
                 
                 container.innerHTML += `
                     <div class="bg-slate-900 rounded-xl p-2 md:p-2.5 flex flex-col justify-between border border-slate-800 shadow-sm ${isCurrentlyCalled ? 'animate-flash ring-2 ring-emerald-400' : ''}">
@@ -704,9 +800,11 @@
                 `;
             });
 
-            if(queueState.lastCalled.ticket) {
-                document.getElementById('tv-last-poli').innerText = queueState.lastCalled.poli.toUpperCase();
-                document.getElementById('tv-last-ticket').innerText = queueState.lastCalled.ticket;
+            if(queueState.lastCalled && queueState.lastCalled.ticket) {
+                const lp = document.getElementById('tv-last-poli');
+                const lt = document.getElementById('tv-last-ticket');
+                if(lp) lp.innerText = queueState.lastCalled.poli ? queueState.lastCalled.poli.toUpperCase() : '---';
+                if(lt) lt.innerText = queueState.lastCalled.ticket;
             }
         }
 
@@ -739,37 +837,54 @@
             suaraPanggil(lastCallData.prefix, lastCallData.num);
 
             const overlay = document.getElementById('tv-call-overlay');
-            document.getElementById('tv-overlay-ticket').innerText = lastCallData.ticket;
+            const overlayTicket = document.getElementById('tv-overlay-ticket');
+            if(overlayTicket) overlayTicket.innerText = lastCallData.ticket;
             
-            overlay.classList.remove('scale-0', 'opacity-0');
-            overlay.classList.add('scale-100', 'opacity-100');
+            if(overlay) {
+                overlay.classList.remove('scale-0', 'opacity-0');
+                overlay.classList.add('scale-100', 'opacity-100');
+            }
 
             clearTimeout(tvCallTimeout);
             tvCallTimeout = setTimeout(() => {
-                overlay.classList.remove('scale-100', 'opacity-100');
-                overlay.classList.add('scale-0', 'opacity-0');
+                if(overlay) {
+                    overlay.classList.remove('scale-100', 'opacity-100');
+                    overlay.classList.add('scale-0', 'opacity-0');
+                }
             }, 7000);
         }
 
         function switchView(viewName) {
-            ['kiosk', 'admin', 'tv'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            ['kiosk', 'admin', 'tv'].forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if(el) el.classList.add('hidden');
+            });
+            const targetView = document.getElementById(`view-${viewName}`);
+            if(targetView) targetView.classList.remove('hidden');
             currentViewMode = viewName;
             
+            const nav = document.getElementById('main-nav');
+            const tvAudio = document.getElementById('tv-start-audio');
+            
             if (viewName === 'tv') {
-                document.getElementById('main-nav').classList.add('hidden');
-                document.getElementById('tv-start-audio').classList.remove('hidden');
+                if(nav) nav.classList.add('hidden');
+                if(tvAudio) tvAudio.classList.remove('hidden');
                 isTVModeActive = false;
             } else {
-                document.getElementById('main-nav').classList.remove('hidden');
+                if(nav) nav.classList.remove('hidden');
                 isTVModeActive = false;
             }
         }
 
         function startTVMode() {
-            document.getElementById('tv-start-audio').classList.add('hidden');
+            const tvAudio = document.getElementById('tv-start-audio');
+            if(tvAudio) tvAudio.classList.add('hidden');
             isTVModeActive = true;
-            document.getElementById('tv-video-player').play().catch(e => console.log("Auto-play terblokir", e));
+            renderTVGrid();
+            const vid = document.getElementById('tv-video-player');
+            if(vid) {
+                vid.play().catch(e => console.log("Auto-play terblokir", e));
+            }
         }
 
         function toggleVideoMute() {
@@ -795,17 +910,34 @@
             if(file) {
                 const vidURL = URL.createObjectURL(file);
                 const vid = document.getElementById('tv-video-player');
-                vid.src = vidURL;
-                vid.play();
+                if(vid) {
+                    vid.src = vidURL;
+                    vid.play();
+                }
             }
         }
 
-        function bukaPetunjukPrinter() { document.getElementById('printer-guide-modal').classList.remove('hidden'); }
-        function tutupPetunjukPrinter() { document.getElementById('printer-guide-modal').classList.add('hidden'); }
-        function closeReceiptModal() { document.getElementById('receipt-modal').classList.add('hidden'); }
+        function bukaPetunjukPrinter() { 
+            const m = document.getElementById('printer-guide-modal');
+            if(m) m.classList.remove('hidden'); 
+        }
+        function tutupPetunjukPrinter() { 
+            const m = document.getElementById('printer-guide-modal');
+            if(m) m.classList.add('hidden'); 
+        }
+        function closeReceiptModal() { 
+            const m = document.getElementById('receipt-modal');
+            if(m) m.classList.add('hidden'); 
+        }
         
-        function bukaKonfirmasiReset() { document.getElementById('reset-confirm-modal').classList.remove('hidden'); }
-        function tutupKonfirmasiReset() { document.getElementById('reset-confirm-modal').classList.add('hidden'); }
+        function bukaKonfirmasiReset() { 
+            const m = document.getElementById('reset-confirm-modal');
+            if(m) m.classList.remove('hidden'); 
+        }
+        function tutupKonfirmasiReset() { 
+            const m = document.getElementById('reset-confirm-modal');
+            if(m) m.classList.add('hidden'); 
+        }
         
         function eksekusiResetAntrian() {
             queueState = {
