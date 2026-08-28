@@ -239,7 +239,7 @@
 
             <div class="w-full bg-slate-950 text-slate-400 text-[10px] py-1 px-3 rounded-lg flex justify-between items-center border border-slate-800">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-emerald-400"></i> Harap simpan cetakan struk nomor antrean.</span>
-                <span class="text-slate-500 font-mono">AINUO802 Ready • Ver 2.5</span>
+                <span class="text-slate-500 font-mono">AINUO802 Ready • Ver 2.5.1 (Fixed)</span>
             </div>
         </div>
 
@@ -351,8 +351,8 @@
     <div id="receipt-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
         <div class="bg-slate-800 rounded-2xl p-5 shadow-2xl max-w-sm w-full text-center border border-slate-700">
             <div class="flex justify-center text-emerald-400 text-4xl mb-2"><i class="fa-solid fa-circle-check animate-bounce"></i></div>
-            <h3 class="font-bold text-lg text-white">Tiket Sedang Dicetak!</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Meneruskan ke RawBT</p>
+            <h3 class="font-bold text-lg text-white">Tiket Berhasil Diambil!</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Memproses pencetakan...</p>
             
             <div class="border border-slate-300 rounded-lg p-4 bg-white my-3 text-left font-mono text-slate-900 shadow-inner">
                 <div class="text-center pb-2 border-b border-dashed border-slate-400">
@@ -378,10 +378,10 @@
     <div id="printer-guide-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
         <div class="bg-slate-800 rounded-2xl p-5 shadow-2xl max-w-md w-full border border-slate-700 text-slate-200">
             <h3 class="font-bold text-base text-amber-300 mb-3"><i class="fa-solid fa-print"></i> Info AINUO802 (80mm) & RawBT</h3>
-            <p class="text-xs text-slate-300 mb-2">Sistem ini sudah dioptimasi menggunakan ESC/POS untuk ukuran besar di RawBT.</p>
+            <p class="text-xs text-slate-300 mb-2">Aplikasi telah dikonfigurasi menggunakan standar Cetak Web (HTML/CSS).</p>
             <ul class="list-disc pl-4 text-xs text-slate-400 space-y-1 mb-4">
-                <li>Nomor antrean dan nama poli dicetak besar/tebal, sedangkan header Puskesmas kembali ke ukuran normal.</li>
-                <li>Pastikan driver/mode RawBT mendukung perintah ESC/POS standar.</li>
+                <li>Aktifkan <strong>RawBT Print Service</strong> di pengaturan printer bawaan HP Android Anda.</li>
+                <li>Set ukuran kertas menjadi <strong>80mm</strong> di aplikasi RawBT.</li>
             </ul>
             <button onclick="tutupPetunjukPrinter()" class="w-full py-2 bg-amber-500 text-slate-950 rounded-lg font-bold text-xs">Tutup</button>
         </div>
@@ -398,23 +398,46 @@
         </div>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAhK5GK2vrxirZpPM1JAH3MEQwpeS8SPMg",
-            authDomain: "aplikasi-siantik-delha.firebaseapp.com",
-            databaseURL: "https://aplikasi-siantik-delha-default-rtdb.firebaseio.com",
-            projectId: "aplikasi-siantik-delha",
-            storageBucket: "aplikasi-siantik-delha.firebasestorage.app",
-            messagingSenderId: "34647008178",
-            appId: "1:34647008178:web:e36dc5184c74e372f3faab",
-            measurementId: "G-6NKK7FXD24"
-        };
+    <div id="print-container" class="hidden print:block">
+        <div style="text-align: center; margin-bottom: 10px;">
+            <h2 style="font-size: 18px; font-weight: bold; margin: 0; font-family: 'Courier New', Courier, monospace;">PUSKESMAS DELHA</h2>
+            <p style="font-size: 12px; margin: 0; font-family: 'Courier New', Courier, monospace;">KABUPATEN ROTE NDAO</p>
+        </div>
+        <div style="border-top: 2px dashed black; margin: 10px 0;"></div>
+        <div style="text-align: center;">
+            <p style="font-size: 14px; margin: 0;">NOMOR ANTREAN</p>
+            <h1 id="print-ticket-num" style="font-size: 54px; font-weight: bold; margin: 5px 0; font-family: sans-serif;">---</h1>
+            <h3 id="print-ticket-poli" style="font-size: 20px; font-weight: bold; margin: 0;">---</h3>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 15px;">
+            <span id="print-ticket-date">--/--/----</span>
+            <span id="print-ticket-time">--:--</span>
+        </div>
+        <div style="border-top: 2px dashed black; margin: 10px 0;"></div>
+        <div style="text-align: center; font-size: 12px;">
+        <p style="margin: 0;">Mohon tunggu sampai</p>
+        <p style="margin: 0;">nomor Anda dipanggil.</p>
+        <p style="margin-top: 10px; font-weight: bold;">Terima Kasih</p>
+    </div>
+</div>
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const queueRef = db.ref('queueState');
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAhK5GK2vrxirZpPM1JAH3MEQwpeS8SPMg",
+        authDomain: "siantik-delha-2-default-rtdb.firebaseapp.com",
+        databaseURL: "https://siantik-delha-2-default-rtdb.firebaseio.com",
+        projectId: "siantik-delha-2",
+        storageBucket: "siantik-delha-2.firebasestorage.app",
+        messagingSenderId: "34647008178",
+        appId: "1:34647008178:web:e36dc5184c74e372f3faab",
+        measurementId: "G-6NKK7FXD24"
+    };
 
-        let queueState = {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const queueRef = db.ref('queueState');
+
+    let queueState = {
             globalCounter: 0,
             activeCalling: { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
             history: [],
@@ -445,7 +468,8 @@
                 queueState = {
                     globalCounter: data.globalCounter || 0,
                     activeCalling: data.activeCalling || { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
-                    history: data.history ? Object.values(data.history) : [],
+                    // PERBAIKAN 4: Di-sortir otomatis menggunakan fungsi .sort
+                    history: data.history ? Object.values(data.history).sort((a, b) => b.id - a.id) : [],
                     lastCalled: data.lastCalled || { id: null, ticket: null, poli: null, timestamp: null },
                     videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
                     videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
@@ -471,6 +495,11 @@
         }
 
         function isLayananTerbuka() {
+            // PERBAIKAN 3: Override Jam Pelayanan, Dibuka 24 Jam untuk Testing. 
+            // Jika Anda ingin mengembalikan fitur jam kerja, hapus baris "return true;" di bawah ini.
+            return true; 
+            
+            /*
             const skrg = new Date();
             const hari = skrg.getDay(); 
             const jam = skrg.getHours();
@@ -479,6 +508,7 @@
             if (hari === 5 && jam >= 7 && jam < 10) return true;            // Jum
             if (hari === 6 && jam >= 7 && jam < 11) return true;            // Sab
             return false;
+            */
         }
 
         function updateClock() {
@@ -525,55 +555,32 @@
             };
 
             queueState.history.unshift(tiketBaru);
-            saveToCloud();
 
-            // Tampilkan Modal Struk di Layar
-            document.getElementById('modal-ticket-num').innerText = formatNum;
-            document.getElementById('modal-ticket-category').innerText = categories[catName].name;
-            document.getElementById('modal-ticket-date').innerText = dateStr;
-            document.getElementById('modal-ticket-time').innerText = timeStr;
-            document.getElementById('receipt-modal').classList.remove('hidden');
+            // Menyimpan ke cloud dan memicu cetak
+            queueRef.set(queueState).then(() => {
+                // Tampilkan Modal Struk di Layar HP/Tablet
+                document.getElementById('modal-ticket-num').innerText = formatNum;
+                document.getElementById('modal-ticket-category').innerText = categories[catName].name;
+                document.getElementById('modal-ticket-date').innerText = dateStr;
+                document.getElementById('modal-ticket-time').innerText = timeStr;
+                document.getElementById('receipt-modal').classList.remove('hidden');
 
-            // --- FORMAT CETAK RAWBT DENGAN ESC/POS (HEADER NORMAL, NOMOR & POLI BESAR TEBAL) ---
-            const ESC = "\x1B";
-            const GS = "\x1D";
-            const alignCenter = ESC + "a" + "\x01";
-            const alignLeft = ESC + "a" + "\x00";
-            const boldOn = ESC + "E" + "\x01";
-            const boldOff = ESC + "E" + "\x00";
-            const hugeSize = GS + "!" + "\x33";   // Ukuran sangat besar (untuk Nomor Antrean)
-            const mediumSize = GS + "!" + "\x11"; // Ukuran sedang/tebal (untuk Nama Poli)
-            const normalSize = GS + "!" + "\x00"; // Ukuran standar
+                // Siapkan data di kontainer khusus cetak (print-container)
+                document.getElementById('print-ticket-num').innerText = formatNum;
+                document.getElementById('print-ticket-poli').innerText = categories[catName].name.toUpperCase();
+                document.getElementById('print-ticket-date').innerText = dateStr;
+                document.getElementById('print-ticket-time').innerText = timeStr;
 
-            const lineDivider = "------------------------------------------------";
-            const poliName = categories[catName].name.toUpperCase();
-            
-            const rawbtText = 
-                ESC + "@" + // Initialize printer
-                alignCenter +
-                normalSize + boldOn + // Puskesmas & Kabupaten ukuran normal tebal
-                "PUSKESMAS DELHA\n" +
-                "KABUPATEN ROTE NDAO\n\n" +
-                normalSize + boldOff +
-                "NOMOR ANTREAN\n\n" +
-                hugeSize + boldOn + // Nomor antrean sangat besar dan tebal (\x33)
-                formatNum + "\n\n" +
-                mediumSize + boldOn + // Nama Poli ukuran sedang tebal (\x11)
-                poliName + "\n\n" +
-                normalSize + boldOff +
-                alignLeft +
-                dateStr + "                       " + timeStr + "\n" +
-                alignCenter +
-                lineDivider + "\n" +
-                "Mohon tunggu sampai\n" +
-                "nomor Anda dipanggil.\n\n" +
-                "Terima Kasih\n\n\n\n";
-
-            // Eksekusi pemanggilan ke aplikasi RawBT
-            setTimeout(() => {
-                const rawbtUrl = 'rawbt:' + encodeURIComponent(rawbtText);
-                window.location.href = rawbtUrl;
-            }, 400);
+                // Eksekusi pemanggilan print bawaan browser
+                // Saat dialog print muncul di Android, RawBT yang diset sebagai Print Service 
+                // akan menangkap layout HTML/CSS ini dan mencetaknya secara rapi tanpa kode aneh.
+                setTimeout(() => {
+                    window.print();
+                }, 500);
+            }).catch((error) => {
+                alert("Gagal terhubung ke Cloud! Pastikan internet aktif dan Rules Firebase sudah dibuat 'true'.");
+                console.error("Firebase Update Error: ", error);
+            });
         }
 
         function panggilLayanan(key, ticketId, isRepeat = false) {
