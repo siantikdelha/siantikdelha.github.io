@@ -125,7 +125,7 @@
         <div id="firebase-diagnostic" class="hidden fixed bottom-3 left-3 right-3 md:left-auto md:right-3 md:w-[360px] z-[200] bg-slate-900 border border-slate-700 rounded-xl p-3 shadow-2xl text-[10px]">
             <div class="font-black text-white mb-1">STATUS KONEKSI SIANTIK</div>
             <div class="text-slate-400">Firebase: <span id="diag-firebase">Memeriksa...</span></div>
-            <div class="text-slate-400">Database: <span class="font-mono text-slate-300">queueState_v4</span></div>
+            <div class="text-slate-400">Database: <span class="font-mono text-slate-300">queueState_v3</span></div>
             <div class="text-slate-400 mt-1">Jika tablet dan komputer memakai link GitHub yang sama, keduanya harus menunjukkan <b class="text-emerald-400">FIREBASE TERHUBUNG</b>.</div>
         </div>
 
@@ -277,6 +277,9 @@
                     </label>
                     <button onclick="ujiKoneksiFirebase()" class="px-3 py-1.5 border border-cyan-500/50 text-cyan-300 hover:bg-cyan-950/50 rounded-lg text-xs font-bold transition flex items-center gap-1">
                             <i class="fa-solid fa-plug-circle-check"></i> Tes Firebase
+                        </button>
+                        <button onclick="cekAksesDatabase()" class="px-3 py-1.5 border border-violet-500/50 text-violet-300 hover:bg-violet-950/50 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <i class="fa-solid fa-database"></i> Tes READ/WRITE
                         </button>
                         <button onclick="bukaKonfirmasiReset()" class="px-3 py-1.5 border border-rose-500/50 text-rose-400 hover:bg-rose-950/50 rounded-lg text-xs font-bold transition flex items-center gap-1">
                         <i class="fa-solid fa-trash-can"></i> Reset Antrean
@@ -458,7 +461,7 @@
         try {
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             db = firebase.database();
-            queueRef = db.ref('queueState_v4');
+            queueRef = db.ref('queueState_v3');
 
             // Status koneksi Firebase yang benar-benar berasal dari Realtime Database.
             db.ref('.info/connected').on('value', snap => {
@@ -496,7 +499,7 @@
             console.error('Firebase initialization error:', e);
         }
 
-        const STORAGE_KEY = 'siantik_delha_queue_data_v4';
+        const STORAGE_KEY = 'siantik_delha_queue_data_v3';
         const channel = new BroadcastChannel('siantik_delha_sync_channel_v3');
 
         let queueState = {
@@ -626,10 +629,18 @@
 
             try {
                 await queueRef.set(queueState);
+                setFirebaseStatus('connected', 'FIREBASE TERHUBUNG');
                 return true;
             } catch (err) {
                 console.error("Firebase write error:", err);
-                setFirebaseStatus('error', 'GAGAL MENYIMPAN');
+                const code = err && err.code ? err.code : '';
+                if (code === 'PERMISSION_DENIED') {
+                    setFirebaseStatus('error', 'WRITE DITOLAK RULES');
+                } else if (!navigator.onLine) {
+                    setFirebaseStatus('error', 'INTERNET TERPUTUS');
+                } else {
+                    setFirebaseStatus('error', 'GAGAL MENYIMPAN');
+                }
                 return false;
             }
         }
@@ -1054,6 +1065,31 @@
                 if (diag) diag.classList.toggle('hidden');
             }
         });
+
+        async function cekAksesDatabase() {
+            const diag = document.getElementById('firebase-diagnostic');
+            if (diag) diag.classList.remove('hidden');
+
+            if (!queueRef) {
+                alert('Firebase belum siap.');
+                return;
+            }
+
+            try {
+                await queueRef.child('__connection_test__').set({
+                    ok: true,
+                    device: navigator.userAgent.substring(0, 80),
+                    time: Date.now()
+                });
+                await queueRef.child('__connection_test__').remove();
+                setFirebaseStatus('connected', 'READ/WRITE BERHASIL');
+                alert('BERHASIL! Firebase mengizinkan READ dan WRITE. Tablet dan komputer dapat memakai database yang sama.');
+            } catch (err) {
+                console.error('Firebase Rules test:', err);
+                setFirebaseStatus('error', err && err.code === 'PERMISSION_DENIED' ? 'RULES MENOLAK WRITE' : 'WRITE GAGAL');
+                alert('WRITE GAGAL. Jika muncul PERMISSION_DENIED, masalahnya ada pada Rules Firebase Realtime Database.');
+            }
+        }
     </script>
 </body>
 </html>
