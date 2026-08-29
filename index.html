@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIANTIK DELHA - Antrean Realtime (Cloud Sync)</title>
-    <!-- Tailwind CSS -->
+    <title>SIANTIK DELHA - Antrean (Thermal AINUO802 80mm)</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Inter & FontAwesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
     <style>
         body { 
@@ -23,9 +26,7 @@
             box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .card-premium:active:not(:disabled) {
-            transform: scale(0.96);
-        }
+        .card-premium:active:not(:disabled) { transform: scale(0.96); }
         .card-premium:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.3);
@@ -35,7 +36,12 @@
             @page { size: 80mm auto; margin: 0 !important; }
             body, html { width: 80mm !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; }
             body > *:not(#print-container) { display: none !important; }
-            * { color: #000000 !important; box-shadow: none !important; background: transparent !important; }
+            #print-container {
+                display: block !important; width: 76mm !important; margin: 0 auto !important; padding: 2mm 0 !important;
+                background: white !important; color: black !important; font-family: 'Courier New', Courier, monospace !important;
+                position: absolute; top: 0; left: 0;
+            }
+            * { color: #000000 !important; box-shadow: none !important; text-shadow: none !important; background: transparent !important; }
         }
 
         ::-webkit-scrollbar { width: 6px; }
@@ -44,52 +50,83 @@
         
         @keyframes flash-green { 0%, 100% { background-color: #064e3b; } 50% { background-color: #10b981; transform: scale(1.02); } }
         .animate-flash { animation: flash-green 1s ease-in-out infinite; }
+
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
         .animate-shake { animation: shake 0.3s ease-in-out; }
-        
-        /* Toast Animation */
-        @keyframes slideInUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .toast-enter { animation: slideInUp 0.3s ease-out forwards; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-900 text-slate-100 overflow-x-hidden">
 
-    <!-- Notifikasi Toast Container -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-[200] flex flex-col gap-2 pointer-events-none"></div>
+    <div id="device-role-selector" class="fixed inset-0 bg-slate-900 z-[200] flex flex-col items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 max-w-2xl w-full text-center">
+            <div class="flex justify-center mb-6">
+                <svg class="h-16 w-16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 5 L88.97 27.5V72.5L50 95L11.03 72.5V27.5L50 5Z" fill="#02a652" stroke="#ffffff" stroke-width="4"/>
+                    <circle cx="50" cy="50" r="30" fill="white" />
+                    <path d="M44 26H56V44H74V56H56V74H44V56H26V44H44V26Z" fill="#02a652"/>
+                </svg>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-black text-white mb-2">SIANTIK DELHA</h1>
+            <p class="text-emerald-400 font-bold mb-8">Pilih fungsi untuk perangkat ini:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="setDeviceRole('kiosk')" class="card-premium bg-gradient-to-b from-emerald-600 to-emerald-800 p-6 rounded-xl flex flex-col items-center gap-3 border border-emerald-500/50 group">
+                    <i class="fa-solid fa-tablet-screen-button text-4xl text-white group-hover:scale-110 transition"></i>
+                    <div>
+                        <h2 class="text-lg font-black text-white">Tablet Pasien</h2>
+                        <p class="text-[10px] text-emerald-200 mt-1">Layar untuk mengambil struk tiket</p>
+                    </div>
+                </button>
 
-    <nav id="main-nav" class="bg-slate-800/95 backdrop-blur-md border-b border-slate-700/80 px-4 py-2 flex justify-between items-center shadow-md sticky top-0 z-40 print:hidden">
+                <button onclick="setDeviceRole('admin')" class="card-premium bg-gradient-to-b from-blue-600 to-blue-800 p-6 rounded-xl flex flex-col items-center gap-3 border border-blue-500/50 group">
+                    <i class="fa-solid fa-desktop text-4xl text-white group-hover:scale-110 transition"></i>
+                    <div>
+                        <h2 class="text-lg font-black text-white">Komputer Panggil</h2>
+                        <p class="text-[10px] text-blue-200 mt-1">Layar petugas loket/poli</p>
+                    </div>
+                </button>
+
+                <button onclick="setDeviceRole('tv')" class="card-premium bg-gradient-to-b from-purple-600 to-purple-800 p-6 rounded-xl flex flex-col items-center gap-3 border border-purple-500/50 group">
+                    <i class="fa-solid fa-tv text-4xl text-white group-hover:scale-110 transition"></i>
+                    <div>
+                        <h2 class="text-lg font-black text-white">Layar TV Tampil</h2>
+                        <p class="text-[10px] text-purple-200 mt-1">Layar pantau & suara panggilan</p>
+                    </div>
+                </button>
+            </div>
+            <div class="mt-8 text-xs text-slate-400 bg-slate-900/50 py-2 rounded-lg border border-slate-700">
+                <i class="fa-solid fa-wifi text-emerald-400 animate-pulse"></i> Tersambung ke Cloud Firebase
+            </div>
+        </div>
+    </div>
+
+    <nav id="main-nav" class="hidden bg-slate-800/95 backdrop-blur-md border-b border-slate-700/80 px-4 py-2 justify-between items-center shadow-md sticky top-0 z-40 print:hidden">
         <div class="flex items-center gap-2.5">
             <svg class="h-7 w-7 flex-shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M50 5 L88.97 27.5V72.5L50 95L11.03 72.5V27.5L50 5Z" fill="#02a652" stroke="#ffffff" stroke-width="4"/>
                 <circle cx="50" cy="50" r="30" fill="white" />
                 <path d="M44 26H56V44H74V56H56V74H44V56H26V44H44V26Z" fill="#02a652"/>
+                <circle cx="50" cy="50" r="6" fill="white" />
             </svg>
             <div>
-                <span class="font-black text-xs md:text-sm tracking-wider text-emerald-400 block leading-tight">PUSKESMAS DELHA</span>
-                <span class="text-[8px] md:text-[9px] text-slate-400 font-semibold tracking-widest uppercase block">KABUPATEN ROTE NDAO</span>
+                <span class="font-black text-xs md:text-sm tracking-wider text-emerald-400 block leading-tight">ADMIN PANEL</span>
+                <span class="text-[8px] md:text-[9px] text-slate-400 font-semibold tracking-widest uppercase block">SIANTIK DELHA</span>
             </div>
         </div>
         
         <div class="flex gap-1.5 items-center">
-            <span id="koneksi-status" class="hidden sm:flex items-center gap-1 text-[10px] font-bold text-amber-400 mr-2 bg-slate-800 px-2 py-1 rounded border border-amber-400/30">
-                <i class="fa-solid fa-circle-notch fa-spin"></i> Loading...
-            </span>
-            <button onclick="switchView('kiosk')" id="nav-kiosk" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] md:text-xs flex items-center gap-1 shadow-sm opacity-50 transition">
-                <i class="fa-solid fa-tablet-screen-button"></i> Kiosk
+            <button onclick="bukaPetunjukPrinter()" class="px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold text-[10px] md:text-xs flex items-center gap-1 transition">
+                <i class="fa-solid fa-print"></i> <span class="hidden sm:inline">Seting Printer 80mm</span>
             </button>
-            <button onclick="switchView('admin')" id="nav-admin" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] md:text-xs flex items-center gap-1 shadow-sm transition">
-                <i class="fa-solid fa-sliders"></i> Panel
-            </button>
-            <button onclick="switchView('tv')" id="nav-tv" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white font-bold text-[10px] md:text-xs flex items-center gap-1 shadow-sm hover:bg-teal-500 transition opacity-50">
-                <i class="fa-solid fa-tv"></i> TV
+            <button onclick="resetDeviceRole()" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-[10px] md:text-xs flex items-center gap-1 shadow-sm hover:bg-rose-500 transition">
+                <i class="fa-solid fa-rotate-left"></i> Ganti Perangkat
             </button>
         </div>
     </nav>
 
     <main class="flex-grow w-full flex flex-col items-center justify-center p-2 md:p-3 max-w-[1400px] mx-auto print:hidden">
         
-        <!-- KIOSK VIEW -->
-        <div id="view-kiosk" class="w-full hidden flex-col h-[calc(100vh-60px)] justify-between gap-2 animate-fade-in">
+        <div id="view-kiosk" class="w-full hidden flex-col h-[calc(100vh-20px)] justify-between gap-2 animate-fade-in">
             <div class="w-full bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 rounded-xl py-2 px-4 flex flex-row items-center justify-between shadow-lg border border-emerald-500/30">
                 <div class="flex items-center gap-3">
                     <div class="flex-shrink-0 bg-white/95 p-1.5 rounded-lg shadow-md">
@@ -101,11 +138,14 @@
                     </div>
                     <div>
                         <h1 class="text-white text-lg md:text-2xl font-black uppercase tracking-wider leading-none">SIANTIK DELHA</h1>
-                        <p class="text-emerald-300 text-[9px] md:text-[10px] font-bold tracking-widest mt-0.5 uppercase">SILAHKAN SENTUH TOMBOL POLI</p>
+                        <p class="text-emerald-300 text-[9px] md:text-[10px] font-bold tracking-widest mt-0.5 uppercase">SILAHKAN SENTUH TOMBOL POLI DI BAWAH UNTUK MENGAMBIL NOMOR ANTREAN</p>
                     </div>
                 </div>
-
                 <div class="flex items-center gap-3">
+                    <div class="hidden lg:flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 px-3 py-1 rounded-lg text-amber-300 text-[10px] font-semibold">
+                        <i class="fa-solid fa-print"></i>
+                        <span>AINUO802 Siap</span>
+                    </div>
                     <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-lg border border-white/10 text-right min-w-[120px]">
                         <p id="kiosk-live-date" class="text-emerald-300 text-[8px] font-bold uppercase leading-tight"></p>
                         <p id="kiosk-live-time" class="text-white text-base md:text-lg font-black tracking-widest leading-tight"></p>
@@ -113,18 +153,33 @@
                 </div>
             </div>
 
+            <div class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 px-3 flex items-center justify-between text-[10px] md:text-xs font-semibold text-slate-300">
+                <div class="flex items-center gap-1.5 text-emerald-400 font-bold">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span class="uppercase text-[9px] md:text-[11px]">Jam Pelayanan Loket:</span>
+                </div>
+                <div class="flex gap-2">
+                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Senin - Kamis: 07.00 - 11.00</span>
+                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Jumat: 07.00 - 10.00</span>
+                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Sabtu: 07.00 - 11.00</span>
+                    <span class="bg-red-900/80 text-red-200 px-2 py-0.5 rounded border border-red-700 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-truck-medical animate-pulse text-[9px]"></i> IGD: 24 JAM
+                    </span>
+                </div>
+            </div>
+
             <div class="grid grid-cols-4 grid-rows-2 gap-2.5 flex-grow w-full my-auto">
-                <button onclick="ambilTiket('DEWASA', 'D')" class="card-premium bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-500 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-blue-400/30 group">
+                <button id="btn-DEWASA" onclick="ambilTiket('DEWASA', 'D')" class="card-premium bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-500 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-blue-400/30 group">
                     <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mt-1 group-hover:scale-110 transition">
                         <i class="fa-solid fa-user-doctor text-2xl text-blue-200"></i>
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">POLI DEWASA</span>
-                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-blue-100 bg-black/25 block">UMUM DEWASA</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-blue-100 bg-black/25 block">POLI UMUM DEWASA</span>
                     </div>
                 </button>
 
-                <button onclick="ambilTiket('ANAK', 'A')" class="card-premium bg-gradient-to-br from-orange-500 to-amber-700 hover:from-orange-400 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-orange-400/30 group">
+                <button id="btn-ANAK" onclick="ambilTiket('ANAK', 'A')" class="card-premium bg-gradient-to-br from-orange-500 to-amber-700 hover:from-orange-400 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-orange-400/30 group">
                     <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mt-1 group-hover:scale-110 transition">
                         <i class="fa-solid fa-baby text-2xl text-orange-200"></i>
                     </div>
@@ -134,17 +189,17 @@
                     </div>
                 </button>
 
-                <button onclick="ambilTiket('KIA', 'K')" class="card-premium bg-gradient-to-br from-pink-600 to-rose-800 hover:from-pink-500 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-pink-400/30 group">
+                <button id="btn-KIA" onclick="ambilTiket('KIA', 'K')" class="card-premium bg-gradient-to-br from-pink-600 to-rose-800 hover:from-pink-500 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-pink-400/30 group">
                     <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mt-1 group-hover:scale-110 transition">
                         <i class="fa-solid fa-person-pregnant text-2xl text-pink-200"></i>
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">POLI KIA</span>
-                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-pink-100 bg-black/25 block">IBU & ANAK</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-pink-100 bg-black/25 block">KESEHATAN IBU & ANAK</span>
                     </div>
                 </button>
 
-                <button onclick="ambilTiket('KB', 'B')" class="card-premium bg-gradient-to-br from-purple-600 to-indigo-800 hover:from-purple-500 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-purple-400/30 group">
+                <button id="btn-KB" onclick="ambilTiket('KB', 'B')" class="card-premium bg-gradient-to-br from-purple-600 to-indigo-800 hover:from-purple-500 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-purple-400/30 group">
                     <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mt-1 group-hover:scale-110 transition">
                         <i class="fa-solid fa-people-roof text-2xl text-purple-200"></i>
                     </div>
@@ -154,49 +209,51 @@
                     </div>
                 </button>
 
-                <button onclick="ambilTiket('GIGI', 'G')" class="card-premium bg-gradient-to-br from-emerald-600 to-teal-800 hover:from-emerald-500 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-emerald-400/30 group">
+                <button id="btn-GIGI" onclick="ambilTiket('GIGI', 'G')" class="card-premium bg-gradient-to-br from-emerald-600 to-teal-800 hover:from-emerald-500 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-emerald-400/30 group">
                     <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mt-1 group-hover:scale-110 transition">
                         <i class="fa-solid fa-tooth text-2xl text-emerald-200"></i>
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">POLI GIGI</span>
-                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-emerald-100 bg-black/25 block">GIGI & MULUT</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-emerald-100 bg-black/25 block">KESEHATAN GIGI & MULUT</span>
                     </div>
                 </button>
 
-                <button onclick="ambilTiket('KONSELING', 'S')" class="card-premium bg-gradient-to-br from-amber-500 to-yellow-700 hover:from-amber-400 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-amber-400/30 group">
+                <button id="btn-KONSELING" onclick="ambilTiket('KONSELING', 'S')" class="card-premium bg-gradient-to-br from-amber-500 to-yellow-700 hover:from-amber-400 text-white rounded-xl p-2 flex flex-col justify-between items-center text-center border border-amber-400/30 group">
                     <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mt-1 group-hover:scale-110 transition">
                         <i class="fa-solid fa-comments text-2xl text-amber-100"></i>
                     </div>
                     <div>
                         <span class="text-base md:text-lg font-black uppercase tracking-wide block leading-tight">KONSELING</span>
-                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-amber-100 bg-black/25 block">KONSULTASI</span>
+                        <span class="text-[9px] font-bold mt-1 px-2 py-0.5 rounded-full text-amber-100 bg-black/25 block">KONSULTASI KLINIK</span>
                     </div>
                 </button>
 
-                <button onclick="ambilTiket('IGD', 'I')" class="card-premium col-span-2 bg-gradient-to-br from-red-600 via-rose-700 to-red-900 hover:from-red-500 text-white rounded-xl p-2 flex flex-row justify-center items-center gap-4 text-center border border-red-400/40 group">
+                <button id="btn-IGD" onclick="ambilTiket('IGD', 'I')" class="card-premium col-span-2 bg-gradient-to-br from-red-600 via-rose-700 to-red-900 hover:from-red-500 text-white rounded-xl p-2 flex flex-row justify-center items-center gap-4 text-center border border-red-400/40 group">
                     <div class="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center group-hover:scale-110 transition flex-shrink-0">
                         <i class="fa-solid fa-truck-medical text-3xl text-red-200 animate-pulse"></i>
                     </div>
                     <div class="text-left">
                         <span class="text-xl md:text-2xl font-black uppercase tracking-wider block">IGD 24 JAM</span>
-                        <span class="text-[10px] font-bold mt-0.5 px-2.5 py-0.5 rounded-full text-red-100 bg-black/30 inline-block">GAWAT DARURAT</span>
+                        <span class="text-[10px] font-bold mt-0.5 px-2.5 py-0.5 rounded-full text-red-100 bg-black/30 inline-block">INSTALASI GAWAT DARURAT</span>
                     </div>
                 </button>
             </div>
             
+            <!-- Tombol tersembunyi untuk reset role dari Kiosk jika salah pencet (tap 5x) -->
             <div class="w-full bg-slate-950 text-slate-400 text-[10px] py-1 px-3 rounded-lg flex justify-between items-center border border-slate-800">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-print text-amber-400"></i> Menggunakan printer Bluetooth via RawBT</span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-emerald-400"></i> Harap simpan cetakan struk nomor antrean.</span>
+                <span class="text-slate-500 font-mono" ondblclick="resetDeviceRole()">AINUO802 Ready • Ver 3.0 (Cloud)</span>
             </div>
         </div>
 
-        <!-- ADMIN VIEW (Panel) -->
-        <div id="view-admin" class="w-full flex flex-col gap-4 animate-fade-in py-2">
+        <div id="view-admin" class="w-full hidden flex-col gap-4 animate-fade-in py-2">
             <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
                 <div>
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-emerald-400"></i> Panel Operator
+                        <i class="fa-solid fa-microphone-lines text-blue-400"></i> Panel Pemanggilan Pasien
                     </h2>
+                    <p class="text-xs text-slate-400">Panggil dari komputer loket/poli mana saja.</p>
                 </div>
                 <div class="flex gap-2 flex-wrap justify-end items-center">
                     <button onclick="bukaKonfirmasiReset()" class="px-3 py-1.5 border border-rose-500/50 text-rose-400 hover:bg-rose-950/50 rounded-lg text-xs font-bold transition flex items-center gap-1">
@@ -209,37 +266,56 @@
                 <div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-col gap-3">
                     <h3 class="font-bold text-base text-slate-200 border-b border-slate-700 pb-2 flex justify-between items-center">
                         <span>Layanan Poli / Loket</span>
-                        <span id="admin-koneksi-text" class="text-xs text-amber-400 font-semibold"><i class="fa-solid fa-wifi"></i> Sinkronisasi Cloud...</span>
+                        <span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> Tersinkronisasi</span>
                     </h3>
-                    <!-- Container Kartu Poli -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="admin-cards-container"></div>
                 </div>
 
                 <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-col h-[480px]">
                     <h3 class="font-bold text-base text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> Log Pendaftaran
+                        <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> Log Tiket (Bisa dipanggil ulang)
                     </h3>
                     <div class="flex-grow overflow-y-auto pr-1 flex flex-col gap-2" id="history-log"></div>
                 </div>
             </div>
         </div>
 
-        <!-- TV VIEW -->
         <div id="view-tv" class="hidden w-full min-h-screen bg-slate-950 absolute top-0 left-0 z-50 flex-col print:hidden">
             <div class="bg-slate-900 text-white px-6 py-3 flex justify-between items-center shadow-md border-b border-slate-800 h-[80px]">
                 <div class="flex items-center gap-3">
-                    <h1 class="text-2xl font-black tracking-wider text-emerald-400">SIANTIK DELHA</h1>
+                    <svg class="h-10 w-10 flex-shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50 5 L88.97 27.5V72.5L50 95L11.03 72.5V27.5L50 5Z" fill="#02a652" stroke="#ffffff" stroke-width="4"/>
+                        <circle cx="50" cy="50" r="30" fill="white" />
+                        <path d="M44 26H56V44H74V56H56V74H44V56H26V44H44V26Z" fill="#02a652"/>
+                    </svg>
+                    <div>
+                        <h1 class="text-2xl font-black tracking-wider text-emerald-400">SIANTIK DELHA</h1>
+                        <p class="text-xs text-slate-400 font-bold tracking-widest">PUSKESMAS DELHA</p>
+                    </div>
                 </div>
+                
+                <!-- Video Controls untuk TV -->
+                <div class="flex items-center gap-4 bg-slate-800/80 px-4 py-1.5 rounded-full border border-slate-700">
+                     <button onclick="toggleVideoMute()" id="admin-mute-btn" class="text-indigo-400 hover:text-indigo-300 transition">
+                        <i class="fa-solid fa-volume-high" id="admin-mute-icon"></i>
+                    </button>
+                    <input type="range" id="admin-volume-slider" min="0" max="100" value="50" oninput="setVideoVolume(this.value)" class="w-20 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    <label for="video-upload" class="cursor-pointer text-indigo-400 hover:text-indigo-300 text-xs font-bold transition flex items-center gap-1 ml-2 border-l border-slate-600 pl-4">
+                        <i class="fa-solid fa-film"></i> Ganti Video
+                        <input type="file" id="video-upload" accept="video/*" class="hidden" onchange="gantiVideoTV(event)">
+                    </label>
+                </div>
+
                 <div class="text-right">
                     <div id="tv-live-time" class="text-3xl font-black text-white tracking-wider"></div>
+                    <div id="tv-live-date" class="text-xs font-bold text-emerald-400 uppercase mt-0.5"></div>
                 </div>
             </div>
 
             <div class="flex-grow flex p-3 gap-3 h-[calc(100vh-80px)]">
                 <div class="w-8/12 flex flex-col gap-3 h-full relative">
-                    <div class="flex-grow bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800 relative flex items-center justify-center">
-                        <!-- Video Default TV -->
-                        <video id="tv-video-player" class="w-full h-full object-contain" autoplay loop muted playsinline>
+                    <div class="flex-grow bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800 relative flex items-center justify-center group">
+                        <video id="tv-video-player" class="w-full h-full object-contain opacity-100" autoplay loop playsinline>
                             <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
                         </video>
                     </div>
@@ -254,79 +330,117 @@
                         </div>
                     </div>
 
-                    <div id="tv-call-overlay" class="absolute inset-0 bg-emerald-700 rounded-2xl z-10 flex flex-col items-center justify-center border-4 border-white shadow-2xl transition-all duration-500 transform scale-0 opacity-0">
+                    <div id="tv-call-overlay" class="absolute inset-0 bg-emerald-700 rounded-2xl z-10 flex flex-col items-center justify-center border-4 border-white shadow-2xl transition-all duration-500 transform scale-0 opacity-0 pointer-events-none">
                         <i class="fa-solid fa-bullhorn text-6xl text-emerald-100 animate-bounce mb-4"></i>
-                        <h2 id="tv-overlay-ticket" class="text-8xl font-black text-white my-2 drop-shadow-2xl">---</h2>
-                        <h3 id="tv-overlay-poli" class="text-4xl font-black text-amber-300 mt-1 uppercase">LOKET PENDAFTARAN</h3>
+                        <p class="text-emerald-100 font-bold text-xl uppercase tracking-widest">Nomor Antrean</p>
+                        <h2 id="tv-overlay-ticket" class="text-8xl md:text-9xl font-black text-white my-2 drop-shadow-2xl leading-none">---</h2>
+                        <p class="text-emerald-100 font-bold text-xl uppercase tracking-widest mt-2">Silakan Menuju</p>
+                        <h3 id="tv-overlay-poli" class="text-4xl font-black text-amber-300 mt-1 text-center px-4 uppercase">LOKET PENDAFTARAN</h3>
                     </div>
                 </div>
                 <div class="w-4/12 grid grid-cols-2 gap-2 h-full align-content-start" id="tv-grid-container"></div>
             </div>
             
-            <button onclick="switchView('admin')" class="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-full shadow-2xl z-[60]">
-                <i class="fa-solid fa-xmark"></i>
+            <button onclick="resetDeviceRole()" class="absolute bottom-4 left-4 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white px-3 py-1.5 rounded-full border border-slate-700 text-[10px] shadow-2xl z-[60] transition backdrop-blur-md">
+                <i class="fa-solid fa-rotate-left"></i> Ganti Perangkat
             </button>
+
+            <!-- Tampilan Awal TV untuk Izinkan Suara (Kebijakan Browser) -->
+            <div id="tv-start-audio" class="absolute inset-0 bg-slate-950/95 z-[70] flex flex-col items-center justify-center p-6 text-center">
+                <i class="fa-solid fa-volume-high text-6xl text-emerald-500 mb-4 animate-pulse"></i>
+                <h2 class="text-2xl font-bold text-white mb-2">Aktifkan Layar TV Suara</h2>
+                <p class="text-slate-400 mb-6 max-w-md">Browser membutuhkan izin untuk memutar suara panggilan secara otomatis.</p>
+                <button onclick="startTVMode()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-extrabold text-lg shadow-lg hover:scale-105 transition flex items-center gap-3 border border-emerald-400/50">
+                    <i class="fa-solid fa-play text-xl"></i> MULAI TAMPILAN TV
+                </button>
+            </div>
         </div>
     </main>
 
-    <!-- Modal Cetak (Kiosk) -->
     <div id="receipt-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
         <div class="bg-slate-800 rounded-2xl p-5 shadow-2xl max-w-sm w-full text-center border border-slate-700">
             <div class="flex justify-center text-emerald-400 text-4xl mb-2"><i class="fa-solid fa-circle-check animate-bounce"></i></div>
-            <h3 class="font-bold text-lg text-white">Tiket Berhasil Diambil!</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Meneruskan ke Printer (RawBT)...</p>
+            <h3 class="font-bold text-lg text-white">Tiket Sedang Dicetak!</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Meneruskan ke RawBT</p>
             
-            <div class="border border-slate-300 rounded-lg p-4 bg-white my-3 text-center text-slate-900">
-                <p id="modal-ticket-num" class="text-4xl font-black my-1">---</p>
-                <span id="modal-ticket-category" class="bg-slate-200 text-slate-800 text-[10px] font-bold px-2 py-1 rounded">---</span>
+            <div class="border border-slate-300 rounded-lg p-4 bg-white my-3 text-left font-mono text-slate-900 shadow-inner">
+                <div class="text-center pb-2 border-b border-dashed border-slate-400">
+                    <p class="font-black text-sm">PUSKESMAS DELHA</p>
+                </div>
+                <div class="text-center py-3">
+                    <p class="text-[9px] text-slate-500 uppercase font-semibold">NOMOR ANTREAN</p>
+                    <p id="modal-ticket-num" class="text-4xl font-black text-slate-900 my-1">---</p>
+                    <span id="modal-ticket-category" class="bg-slate-100 border border-slate-300 text-slate-800 text-[10px] font-bold px-2.5 py-0.5 rounded uppercase">---</span>
+                </div>
+                <div class="text-[9px] text-slate-500 border-t border-dashed border-slate-400 pt-2 flex justify-between">
+                    <span id="modal-ticket-date">--/--/----</span>
+                    <span id="modal-ticket-time">--:--</span>
+                </div>
             </div>
-            <button onclick="document.getElementById('receipt-modal').classList.add('hidden')" class="w-full py-2 bg-slate-700 text-white rounded-lg font-bold text-xs">Tutup</button>
+
+            <div class="flex gap-2">
+                <button onclick="closeReceiptModal()" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg font-bold text-sm transition">Tutup Modal Kiosk</button>
+            </div>
         </div>
     </div>
 
-    <!-- Modal Konfirmasi Reset (Admin) -->
+    <div id="printer-guide-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
+        <div class="bg-slate-800 rounded-2xl p-5 shadow-2xl max-w-md w-full border border-slate-700 text-slate-200">
+            <h3 class="font-bold text-base text-amber-300 mb-3"><i class="fa-solid fa-network-wired"></i> Setup Multi-Perangkat</h3>
+            <p class="text-xs text-slate-300 mb-2">Aplikasi ini sudah tersambung ke Cloud Firebase. Cara menggunakannya di banyak PC/Tablet:</p>
+            <ol class="list-decimal pl-5 text-xs text-slate-400 space-y-1.5 mb-4">
+                <li>Host file HTML ini di internet (misal pakai GitHub Pages atau Hosting cPanel Anda).</li>
+                <li>Buka alamat web (URL) di Tablet Pasien, lalu pilih mode <b>"Tablet Pasien"</b>.</li>
+                <li>Buka alamat web di Komputer Petugas, lalu pilih mode <b>"Komputer Panggil"</b>.</li>
+                <li>Buka alamat web di Smart TV (pakai browser TV), pilih mode <b>"Layar TV Tampil"</b>.</li>
+                <li>Semua akan otomatis sinkron (real-time) selama ada koneksi internet!</li>
+            </ol>
+            <button onclick="tutupPetunjukPrinter()" class="w-full py-2 bg-amber-500 text-slate-950 rounded-lg font-bold text-xs hover:bg-amber-400">Tutup</button>
+        </div>
+    </div>
+
     <div id="reset-confirm-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
         <div class="bg-slate-800 rounded-2xl p-5 text-center border border-slate-700 max-w-xs w-full">
-            <h3 class="font-extrabold text-white">Reset Semua Antrean?</h3>
-            <p class="text-xs text-rose-400 mt-1">Ini akan menghapus seluruh data antrean hari ini di semua perangkat.</p>
-            <div class="flex gap-2 mt-4">
-                <button onclick="document.getElementById('reset-confirm-modal').classList.add('hidden')" class="flex-1 py-2 bg-slate-700 text-white rounded-lg text-xs font-bold">Batal</button>
-                <button onclick="eksekusiResetAntrian()" class="flex-1 py-2 bg-rose-600 text-white rounded-lg text-xs font-bold">Ya, Reset</button>
+            <h3 class="font-extrabold text-white text-lg">Reset Semua Antrean?</h3>
+            <p class="text-xs text-slate-400 mt-2">Nomor antrean akan kembali ke 0. Lakukan ini saat pergantian hari kerja.</p>
+            <div class="flex gap-2 mt-5">
+                <button onclick="tutupKonfirmasiReset()" class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-bold transition">Batal</button>
+                <button onclick="eksekusiResetAntrian()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition">Ya, Reset</button>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Konfigurasi Database Firebase Anda
+    <script>
+        // Konfigurasi Firebase (Sudah Anda sediakan)
         const firebaseConfig = {
             apiKey: "AIzaSyAhK5GK2vrxirZpPM1JAH3MEQwpeS8SPMg",
             authDomain: "aplikasi-siantik-delha.firebaseapp.com",
+            databaseURL: "https://aplikasi-siantik-delha-default-rtdb.firebaseio.com",
             projectId: "aplikasi-siantik-delha",
             storageBucket: "aplikasi-siantik-delha.firebasestorage.app",
             messagingSenderId: "34647008178",
             appId: "1:34647008178:web:e36dc5184c74e372f3faab",
             measurementId: "G-6NKK7FXD24"
         };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
 
-        // Path dokumen sinkronisasi
-        const DOC_ID = "antrean_puskesmas_hari_ini"; 
-        const docRef = doc(db, 'siantik', DOC_ID);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const queueRef = db.ref('queueState');
 
-        // State Global
         let queueState = {
             globalCounter: 0,
-            activeCalling: { DEWASA: "---", ANAK: "---", KIA: "---", KB: "---", GIGI: "---", KONSELING: "---", IGD: "---" },
+            activeCalling: { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
             history: [],
-            lastCalled: null
+            lastCalled: { id: null, ticket: null, poli: null, prefix: null, num: null, timestamp: null },
+            videoVolume: 50,
+            videoMuted: false
         };
+
+        let currentViewMode = null; 
+        let lastPlayedTimestamp = null;
+        let isTVModeActive = false;
+        let tvCallTimeout = null;
+        let savedVideoVolume = 0.5;
 
         const categories = {
             DEWASA: { prefix: 'D', name: 'Poli Dewasa', color: 'bg-blue-600', tvColor: 'bg-blue-700' },
@@ -338,199 +452,196 @@
             IGD: { prefix: 'I', name: 'IGD', color: 'bg-red-600', tvColor: 'bg-red-700' }
         };
 
-        let currentViewMode = 'admin'; 
-        let tvCallTimeout = null;
-        let lastPlayedTimestamp = null;
+        // --- SISTEM PEMILIHAN ROLE PERANGKAT ---
+        window.onload = function() {
+            // Cek apakah ada role yang tersimpan di localStorage atau URL parameters
+            const savedRole = localStorage.getItem('siantik_device_role');
+            
+            if (savedRole && ['kiosk', 'admin', 'tv'].includes(savedRole)) {
+                setDeviceRole(savedRole, false);
+            }
+        };
 
-        // --- SISTEM NOTIFIKASI TOAST ---
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bg = type === 'success' ? 'bg-emerald-600' : (type === 'warning' ? 'bg-amber-500' : 'bg-blue-600');
-            
-            toast.className = `${bg} text-white px-4 py-3 rounded-lg shadow-lg text-sm font-bold flex items-center gap-2 toast-enter pointer-events-auto`;
-            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check' : 'fa-bell'}"></i> ${message}`;
-            
-            container.appendChild(toast);
-            
+        function setDeviceRole(role, saveToStorage = true) {
+            document.getElementById('device-role-selector').style.opacity = '0';
             setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                toast.style.transition = 'all 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
+                document.getElementById('device-role-selector').classList.add('hidden');
+            }, 300);
 
-        // --- INISIALISASI APLIKASI ---
-        async function initApp() {
-            try {
-                // 1. Login Anonim agar diizinkan membaca database
-                await signInAnonymously(auth);
-                document.getElementById('koneksi-status').innerHTML = '<i class="fa-solid fa-cloud text-emerald-400"></i> <span class="text-emerald-400">Cloud Online</span>';
-                document.getElementById('admin-koneksi-text').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Data Tersinkronisasi';
-                document.getElementById('admin-koneksi-text').className = 'text-xs text-emerald-400 font-semibold flex items-center gap-1';
-                
-                // 2. Mulai mendengarkan perubahan dari database secara Real-Time
-                listenToCloudData();
-
-            } catch (error) {
-                console.error("Gagal koneksi Firebase:", error);
-                document.getElementById('koneksi-status').innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> <span class="text-rose-500">Koneksi Gagal</span>';
-                document.getElementById('admin-koneksi-text').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Gagal Konek ke Server';
-                document.getElementById('admin-koneksi-text').className = 'text-xs text-rose-500 font-semibold';
-                showToast('Gagal terhubung ke server antrean!', 'warning');
-            }
-        }
-
-        function listenToCloudData() {
-            onSnapshot(docRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const newData = snapshot.data();
-                    
-                    // Deteksi jika ada tiket baru ditambahkan oleh perangkat Kiosk
-                    if (newData.globalCounter > queueState.globalCounter && currentViewMode === 'admin') {
-                        showToast(`Ada Pasien Baru Mengambil Tiket!`, 'success');
-                    }
-
-                    // Deteksi jika ada panggilan dari Admin untuk dimainkan di TV
-                    if (newData.lastCalled && newData.lastCalled.timestamp !== lastPlayedTimestamp) {
-                        lastPlayedTimestamp = newData.lastCalled.timestamp;
-                        if (currentViewMode === 'tv') {
-                            triggerTVCall(newData.lastCalled);
-                        }
-                    }
-
-                    // Perbarui state lokal dengan data dari cloud
-                    queueState = newData;
-                    renderAllViews();
-                } else {
-                    // Jika dokumen belum ada, buat struktur dasarnya
-                    setDoc(docRef, queueState);
-                }
-            }, (error) => {
-                console.error("Error Realtime Listener: ", error);
-                showToast('Koneksi terputus dari server!', 'warning');
-            });
-        }
-
-        // --- FUNGSI AMBIL TIKET DARI TABLET (KIOSK) ---
-        window.ambilTiket = async function(catKey, prefix) {
-            try {
-                const button = event.currentTarget;
-                button.disabled = true;
-                button.classList.add('opacity-50');
-
-                let tiketBaru = null;
-
-                // Gunakan Transaction agar tidak bentrok jika 2 Kiosk tekan bersamaan
-                await runTransaction(db, async (transaction) => {
-                    const sfDoc = await transaction.get(docRef);
-                    if (!sfDoc.exists()) throw "Data tidak ada!";
-
-                    const data = sfDoc.data();
-                    const newCounter = (data.globalCounter || 0) + 1;
-                    const formatNum = prefix + '-' + newCounter.toString().padStart(3, '0');
-                    
-                    const skrg = new Date();
-                    tiketBaru = {
-                        id: Date.now().toString(),
-                        category: catKey,
-                        prefix: prefix,
-                        num: newCounter,
-                        formatted: formatNum,
-                        time: skrg.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-                        status: 'Menunggu'
-                    };
-
-                    let newHistory = data.history ? [...data.history] : [];
-                    newHistory.unshift(tiketBaru); // Masukkan di urutan teratas (terbaru)
-
-                    // Update database
-                    transaction.update(docRef, {
-                        globalCounter: newCounter,
-                        history: newHistory
-                    });
-                });
-
-                // Tampilkan Modal sukses cetak
-                document.getElementById('modal-ticket-num').innerText = tiketBaru.formatted;
-                document.getElementById('modal-ticket-category').innerText = categories[catKey].name;
-                document.getElementById('receipt-modal').classList.remove('hidden');
-                
-                // Meneruskan ke Aplikasi RawBT (Android) untuk cetak thermal
-                kirimKeRawBT(tiketBaru.formatted, categories[catKey].name);
-
-                setTimeout(() => { 
-                    button.disabled = false; 
-                    button.classList.remove('opacity-50'); 
-                    document.getElementById('receipt-modal').classList.add('hidden');
-                }, 3000);
-
-            } catch (e) {
-                console.error("Gagal ambil tiket:", e);
-                showToast('Gagal memproses tiket. Cek koneksi internet.', 'warning');
-                event.currentTarget.disabled = false;
-                event.currentTarget.classList.remove('opacity-50');
-            }
-        };
-
-        function kirimKeRawBT(formatNum, poliName) {
-            // Perintah ESC/POS Sederhana untuk memperbesar teks nomor antrian
-            const ESC = "\x1B", GS = "\x1D";
-            const rawbtText = ESC + "a\x01" + "PUSKESMAS DELHA\n\nNomor Antrean:\n" + GS + "!\x33" + formatNum + "\n\n" + GS + "!\x11" + poliName.toUpperCase() + "\n\n" + GS + "!\x00Mohon tunggu panggilan.\n\n\n";
-            window.location.href = 'rawbt:' + encodeURIComponent(rawbtText);
-        }
-
-        // --- FUNGSI PANGGIL TIKET DARI ADMIN ---
-        window.panggilLayanan = async function(catKey, ticketId) {
-            if (!ticketId) return;
+            // Sembunyikan semua view
+            ['kiosk', 'admin', 'tv'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
             
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const sfDoc = await transaction.get(docRef);
-                    const data = sfDoc.data();
-                    let history = [...data.history];
-                    let activeCalling = { ...data.activeCalling };
+            // Tampilkan view yang dipilih
+            document.getElementById(`view-${role}`).classList.remove('hidden');
+            currentViewMode = role;
 
-                    const ticketIndex = history.findIndex(t => t.id === ticketId.toString());
-                    if (ticketIndex === -1) return;
-
-                    const ticket = history[ticketIndex];
-                    
-                    // Ubah status jadi dipanggil
-                    history[ticketIndex].status = 'Dilayani';
-                    activeCalling[catKey] = ticket.formatted;
-
-                    const callData = {
-                        ticket: ticket.formatted,
-                        prefix: ticket.prefix,
-                        num: ticket.num,
-                        poli: categories[catKey].name,
-                        poliKey: catKey,
-                        timestamp: Date.now() // Timestamp ini akan mentrigger TV
-                    };
-
-                    transaction.update(docRef, {
-                        history: history,
-                        activeCalling: activeCalling,
-                        lastCalled: callData
-                    });
-                });
-                
-                showToast(`Memanggil ${categories[catKey].name}`, 'info');
-                
-            } catch (e) {
-                console.error("Gagal memanggil:", e);
-                showToast("Gagal memanggil pasien. Cek koneksi.", "warning");
+            // Logika Visibilitas Navigasi
+            if (role === 'admin') {
+                document.getElementById('main-nav').classList.remove('hidden');
+                document.getElementById('main-nav').classList.add('flex');
+            } else {
+                document.getElementById('main-nav').classList.add('hidden');
+                document.getElementById('main-nav').classList.remove('flex');
             }
-        };
 
+            // Logika Khusus TV
+            if (role === 'tv') {
+                document.getElementById('tv-start-audio').classList.remove('hidden');
+                isTVModeActive = false;
+            }
 
-        // --- FUNGSI UI / RENDER ---
-        function renderAllViews() {
-            renderAdminPanel();
-            renderHistoryLog();
-            renderTVGrid();
+            // Simpan ke localStorage agar aman dari SecurityError di iframe blob
+            if (saveToStorage) {
+                localStorage.setItem('siantik_device_role', role);
+            }
+        }
+
+        function resetDeviceRole() {
+            currentViewMode = null;
+            localStorage.removeItem('siantik_device_role');
+            document.getElementById('device-role-selector').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('device-role-selector').style.opacity = '1'; }, 10);
+            
+            // Hentikan video jika ada
+            const vid = document.getElementById('tv-video-player');
+            if(vid) vid.pause();
+        }
+
+        // --- SINKRONISASI FIREBASE REALTIME ---
+        queueRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                queueState = {
+                    globalCounter: data.globalCounter || 0,
+                    activeCalling: data.activeCalling || { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
+                    history: data.history ? Object.values(data.history) : [],
+                    lastCalled: data.lastCalled || { id: null, ticket: null, poli: null, timestamp: null },
+                    videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
+                    videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
+                };
+            }
+            
+            // Hanya render yang diperlukan berdasarkan perangkat ini
+            if (currentViewMode === 'admin') {
+                renderAdminPanel();
+                renderHistoryLog();
+            }
+            
+            if (currentViewMode === 'tv') {
+                renderTVGrid();
+                syncTVVideoState();
+                
+                // Deteksi Panggilan Baru di TV
+                if (queueState.lastCalled.timestamp && queueState.lastCalled.timestamp !== lastPlayedTimestamp) {
+                    lastPlayedTimestamp = queueState.lastCalled.timestamp;
+                    if(isTVModeActive) {
+                        triggerTVCall(queueState.lastCalled);
+                    }
+                }
+            }
+        });
+
+        function saveToCloud() { queueRef.set(queueState); }
+
+        function syncTVVideoState() {
+            const vid = document.getElementById('tv-video-player');
+            if (vid) {
+                vid.volume = queueState.videoVolume / 100;
+                vid.muted = queueState.videoMuted;
+            }
+            const slider = document.getElementById('admin-volume-slider');
+            const icon = document.getElementById('admin-mute-icon');
+            if(slider) slider.value = queueState.videoVolume;
+            if(icon) {
+                if(queueState.videoMuted) {
+                    icon.classList.remove('fa-volume-high'); icon.classList.add('fa-volume-xmark', 'text-rose-500');
+                } else {
+                    icon.classList.remove('fa-volume-xmark', 'text-rose-500'); icon.classList.add('fa-volume-high');
+                }
+            }
+        }
+
+        // --- FUNGSI WAKTU & KIOSK (Sama seperti sebelumnya) ---
+        function isLayananTerbuka() {
+            const skrg = new Date();
+            const hari = skrg.getDay(); 
+            const jam = skrg.getHours();
+            if (hari >= 1 && hari <= 4 && jam >= 7 && jam < 11) return true;
+            if (hari === 5 && jam >= 7 && jam < 10) return true;            
+            if (hari === 6 && jam >= 7 && jam < 11) return true;            
+            return false;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            document.getElementById('kiosk-live-date').innerText = dateStr;
+            document.getElementById('kiosk-live-time').innerText = timeStr;
+            document.getElementById('tv-live-date').innerText = dateStr;
+            document.getElementById('tv-live-time').innerText = timeStr;
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        function ambilTiket(catName, prefix) {
+            if (catName !== 'IGD' && !isLayananTerbuka()) {
+                const btn = document.getElementById(`btn-${catName}`);
+                if(btn) { btn.classList.add('animate-shake'); setTimeout(() => btn.classList.remove('animate-shake'), 300); }
+                return;
+            }
+
+            queueState.globalCounter++;
+            const globalTicketNum = queueState.globalCounter;
+            const formatNum = prefix + '-' + globalTicketNum.toString().padStart(3, '0');
+            const skrg = new Date();
+            const dateStr = skrg.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const timeStr = skrg.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+            const tiketBaru = {
+                id: Date.now(), category: catName, prefix: prefix, num: globalTicketNum,
+                formatted: formatNum, date: dateStr, time: timeStr, datetimeFull: dateStr + ' ' + timeStr, status: 'Menunggu'
+            };
+
+            queueState.history.unshift(tiketBaru);
+            saveToCloud(); // Sinkron ke cloud
+
+            // Tampilkan Modal
+            document.getElementById('modal-ticket-num').innerText = formatNum;
+            document.getElementById('modal-ticket-category').innerText = categories[catName].name;
+            document.getElementById('modal-ticket-date').innerText = dateStr;
+            document.getElementById('modal-ticket-time').innerText = timeStr;
+            document.getElementById('receipt-modal').classList.remove('hidden');
+
+            // Format Cetak ESC/POS
+            const ESC = "\x1B", GS = "\x1D";
+            const alignCenter = ESC + "a" + "\x01", alignLeft = ESC + "a" + "\x00";
+            const boldOn = ESC + "E" + "\x01", boldOff = ESC + "E" + "\x00";
+            const hugeSize = GS + "!" + "\x33", mediumSize = GS + "!" + "\x11", normalSize = GS + "!" + "\x00";
+
+            const rawbtText = ESC + "@" + alignCenter + normalSize + boldOn + "PUSKESMAS DELHA\nKABUPATEN ROTE NDAO\n\n" + normalSize + boldOff + "NOMOR ANTREAN\n\n" + hugeSize + boldOn + formatNum + "\n\n" + mediumSize + boldOn + categories[catName].name.toUpperCase() + "\n\n" + normalSize + boldOff + alignLeft + dateStr + "                       " + timeStr + "\n" + alignCenter + "------------------------------------------------\n" + "Mohon tunggu sampai\nnomor Anda dipanggil.\n\nTerima Kasih\n\n\n\n";
+
+            setTimeout(() => { window.location.href = 'rawbt:' + encodeURIComponent(rawbtText); }, 400);
+        }
+
+        // --- FUNGSI ADMIN ---
+        function panggilLayanan(key, ticketId, isRepeat = false) {
+            if (!ticketId) return;
+            const ticket = queueState.history.find(item => item.id == ticketId);
+            if (!ticket) return;
+
+            if (!isRepeat) {
+                ticket.status = 'Dilayani';
+                queueState.activeCalling[key] = ticket.formatted;
+            }
+
+            // Update state terakhir dipanggil (Ini akan memicu TV di perangkat lain berkat Firebase)
+            queueState.lastCalled = {
+                id: ticketId, ticket: ticket.formatted, prefix: ticket.prefix, num: ticket.num,
+                poli: categories[key].name, poliKey: key, timestamp: Date.now()
+            };
+
+            saveToCloud();
         }
 
         function renderAdminPanel() {
@@ -540,41 +651,38 @@
 
             Object.keys(categories).forEach(key => {
                 const cat = categories[key];
-                
-                // Cari tiket yang masih "Menunggu" dari history. Ambil yang paling lama ditaruh (paling belakang)
-                const waitingTickets = queueState.history.filter(t => t.category === key && t.status === 'Menunggu');
-                const nextTicket = waitingTickets.length > 0 ? waitingTickets[waitingTickets.length - 1] : null;
-                const nextId = nextTicket ? `'${nextTicket.id}'` : 'null';
-                
-                // Cari tiket yang baru saja dipanggil untuk poli ini
-                const currentlyServed = queueState.activeCalling[key] || '---';
-                
-                // Cari ID tiket dari currentlyServed untuk tombol panggil ulang
-                const activeTicketObj = queueState.history.find(t => t.formatted === currentlyServed);
-                const activeId = activeTicketObj ? `'${activeTicketObj.id}'` : 'null';
+                const historyForCat = queueState.history.filter(item => item.category === key);
+                const latestTicketForCat = historyForCat.length > 0 ? historyForCat[0].formatted : 'Belum Ada';
+                const currentlyServed = queueState.activeCalling[key] || 'Belum Ada';
+                const sisaAntrian = queueState.history.filter(item => item.category === key && item.status === 'Menunggu').length;
+                const waitingTickets = queueState.history.filter(item => item.category === key && item.status === 'Menunggu');
+                const nextTicket = waitingTickets[waitingTickets.length - 1]; 
+                const nextTicketId = nextTicket ? nextTicket.id : null;
+                const activeTicket = queueState.history.find(item => item.formatted === currentlyServed);
+                const activeTicketId = activeTicket ? activeTicket.id : null;
 
                 container.innerHTML += `
                     <div class="border border-slate-700 rounded-xl p-3 flex flex-col justify-between bg-slate-900/60">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="font-extrabold text-slate-200 text-sm">${cat.name}</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${cat.color} text-white shadow-sm">Sisa: ${waitingTickets.length}</span>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="font-extrabold text-slate-200 text-xs md:text-sm">${cat.name}</span>
+                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${cat.color} text-white">Sisa: ${sisaAntrian}</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 my-2 text-center">
-                            <div class="bg-slate-800 p-2 rounded-lg border border-slate-700">
-                                <p class="text-[9px] text-slate-400 font-bold uppercase mb-0.5">Antrean Berikutnya</p>
-                                <p class="text-base font-black text-slate-300">${nextTicket ? nextTicket.formatted : 'KOSONG'}</p>
+                        <div class="grid grid-cols-2 gap-2 my-1.5 text-center">
+                            <div class="bg-slate-800 p-1.5 rounded-lg border border-slate-700">
+                                <p class="text-[8px] text-slate-400 font-bold uppercase">Terakhir</p>
+                                <p class="text-sm font-black text-slate-300">${latestTicketForCat}</p>
                             </div>
-                            <div class="bg-slate-800 p-2 rounded-lg border border-slate-700">
-                                <p class="text-[9px] text-slate-400 font-bold uppercase mb-0.5">Sedang Dipanggil</p>
-                                <p class="text-base font-black text-emerald-400">${currentlyServed}</p>
+                            <div class="bg-slate-800 p-1.5 rounded-lg border border-slate-700">
+                                <p class="text-[8px] text-slate-400 font-bold uppercase">Dipanggil</p>
+                                <p class="text-sm font-black text-emerald-400">${currentlyServed}</p>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 mt-1">
-                            <button onclick="panggilLayanan('${key}', ${nextId})" class="py-2.5 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center transition ${!nextTicket ? 'opacity-40 cursor-not-allowed' : 'shadow-md shadow-emerald-900/50'}" ${!nextTicket ? 'disabled' : ''}>
-                                <i class="fa-solid fa-bullhorn mr-1"></i> Panggil
+                        <div class="grid grid-cols-2 gap-2 mt-1.5">
+                            <button onclick="panggilLayanan('${key}', ${nextTicketId})" class="py-2 px-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center justify-center gap-1 transition ${!nextTicketId ? 'opacity-40 cursor-not-allowed' : 'shadow-md'}" ${!nextTicketId ? 'disabled' : ''}>
+                                Panggil Baru
                             </button>
-                            <button onclick="panggilLayanan('${key}', ${activeId})" class="py-2.5 px-2 rounded-lg border border-slate-600 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center transition ${!activeTicketObj ? 'opacity-40 cursor-not-allowed' : ''}" ${!activeTicketObj ? 'disabled' : ''}>
-                                <i class="fa-solid fa-rotate-right mr-1"></i> Ulangi
+                            <button onclick="panggilLayanan('${key}', ${activeTicketId}, true)" class="py-2 px-2 rounded-lg border border-slate-600 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center transition ${!activeTicketId ? 'opacity-40 cursor-not-allowed' : ''}" ${!activeTicketId ? 'disabled' : ''}>
+                                Panggil Ulang
                             </button>
                         </div>
                     </div>
@@ -583,26 +691,28 @@
         }
 
         function renderHistoryLog() {
-            const container = document.getElementById('history-log');
-            if(!container) return;
-            container.innerHTML = '';
+            const logContainer = document.getElementById('history-log');
+            if(!logContainer) return;
+            logContainer.innerHTML = '';
             
             queueState.history.forEach(item => {
                 const isDilayani = item.status === 'Dilayani';
-                container.innerHTML += `
-                    <div class="bg-slate-900/80 p-2.5 rounded border ${isDilayani ? 'border-emerald-700/50' : 'border-slate-700'} flex justify-between items-center text-xs">
+                logContainer.innerHTML += `
+                    <div class="bg-slate-900/50 p-2 rounded border ${isDilayani ? 'border-emerald-700/50' : 'border-slate-700'} flex justify-between items-center text-xs">
                         <div>
-                            <span class="font-bold text-slate-200 text-sm">${item.formatted}</span>
-                            <span class="text-[10px] text-slate-400 ml-1 bg-slate-800 px-1.5 py-0.5 rounded">${categories[item.category].name}</span>
+                            <span class="font-bold text-slate-200">${item.formatted}</span>
+                            <span class="text-[9px] text-slate-500 ml-1">(${categories[item.category].name})</span>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="${isDilayani ? 'text-emerald-400' : 'text-amber-400'} font-semibold text-[10px] uppercase">${item.status}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="${isDilayani ? 'text-emerald-400' : 'text-amber-400'} text-[10px] w-12 text-center">${item.status}</span>
+                            <button onclick="panggilLayanan('${item.category}', ${item.id}, true)" class="bg-slate-700 hover:bg-slate-600 text-white px-2 py-1.5 rounded text-[9px] font-bold"><i class="fa-solid fa-bullhorn"></i> Panggil</button>
                         </div>
                     </div>
                 `;
             });
         }
 
+        // --- FUNGSI TV DAN AUDIO ---
         function renderTVGrid() {
             const container = document.getElementById('tv-grid-container');
             if (!container) return;
@@ -611,15 +721,15 @@
             Object.keys(categories).forEach(key => {
                 const cat = categories[key];
                 const currentTicket = queueState.activeCalling[key] || '---';
-                const isCurrentlyCalled = (queueState.lastCalled && queueState.lastCalled.poliKey === key);
+                const isCurrentlyCalled = (queueState.lastCalled.poliKey === key);
                 
                 container.innerHTML += `
-                    <div class="bg-slate-900 rounded-xl p-2.5 flex flex-col justify-between border border-slate-800 shadow-sm ${isCurrentlyCalled ? 'animate-flash ring-2 ring-emerald-400' : ''}">
+                    <div class="bg-slate-900 rounded-xl p-2 md:p-2.5 flex flex-col justify-between border border-slate-800 shadow-sm ${isCurrentlyCalled ? 'animate-flash ring-2 ring-emerald-400' : ''}">
                         <div class="${cat.tvColor} w-full py-1.5 rounded-md text-center shadow-inner">
-                            <h3 class="text-white font-black text-sm tracking-wider uppercase">${cat.name}</h3>
+                            <h3 class="text-white font-black text-xs md:text-sm tracking-wider uppercase leading-tight">${cat.name}</h3>
                         </div>
-                        <div class="flex-grow flex items-center justify-center bg-slate-950/60 mt-2 rounded-lg py-3">
-                            <span class="text-3xl font-black ${currentTicket === '---' ? 'text-slate-700' : 'text-emerald-400'}">
+                        <div class="flex-grow flex items-center justify-center py-2 bg-slate-950/60 mt-1.5 rounded-lg">
+                            <span class="text-2xl md:text-3xl font-black ${currentTicket === '---' ? 'text-slate-700' : 'text-emerald-400'} drop-shadow">
                                 ${currentTicket}
                             </span>
                         </div>
@@ -627,32 +737,19 @@
                 `;
             });
 
-            if(queueState.lastCalled && queueState.lastCalled.ticket) {
+            if(queueState.lastCalled.ticket) {
                 document.getElementById('tv-last-poli').innerText = queueState.lastCalled.poli.toUpperCase();
                 document.getElementById('tv-last-ticket').innerText = queueState.lastCalled.ticket;
             }
         }
 
-        function triggerTVCall(data) {
-            // Audio Web Speech API
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // stop suara sblmnya
-                const vid = document.getElementById('tv-video-player');
-                if (vid) vid.volume = 0.1; // kecilkan suara video
+        function triggerTVCall(lastCallData) {
+            // Putar Suara (HANYA DIEKSEKUSI DI PERANGKAT TV UNTUK MENGHINDARI SUARA GANDA)
+            suaraPanggilTV(lastCallData.prefix, lastCallData.num);
 
-                const spellLetters = data.prefix + ' ' + data.num.toString().padStart(3, '0').split('').map(d => d === '0' ? 'kosong' : d).join(' ');
-                const utterance = new SpeechSynthesisUtterance(`Nomor antrean, ${spellLetters}, silahkan ke, ${data.poli}.`);
-                utterance.lang = 'id-ID';
-                utterance.rate = 0.85;
-
-                utterance.onend = () => { if (vid) vid.volume = 1.0; };
-                window.speechSynthesis.speak(utterance);
-            }
-
-            // Tampilkan Overlay TV
             const overlay = document.getElementById('tv-call-overlay');
-            document.getElementById('tv-overlay-ticket').innerText = data.ticket;
-            document.getElementById('tv-overlay-poli').innerText = data.poli.toUpperCase();
+            document.getElementById('tv-overlay-ticket').innerText = lastCallData.ticket;
+            document.getElementById('tv-overlay-poli').innerText = lastCallData.poli.toUpperCase();
             
             overlay.classList.remove('scale-0', 'opacity-0');
             overlay.classList.add('scale-100', 'opacity-100');
@@ -661,80 +758,81 @@
             tvCallTimeout = setTimeout(() => {
                 overlay.classList.remove('scale-100', 'opacity-100');
                 overlay.classList.add('scale-0', 'opacity-0');
-            }, 8000);
+            }, 7000);
         }
 
-        // --- NAVIGASI ANTAR VIEW ---
-        window.switchView = function(viewName) {
-            ['kiosk', 'admin', 'tv'].forEach(v => {
-                document.getElementById(`view-${v}`).classList.add('hidden');
-                document.getElementById(`nav-${v}`).classList.replace('opacity-100', 'opacity-50');
-            });
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
-            
-            if(viewName !== 'tv') {
-                document.getElementById(`nav-${viewName}`).classList.replace('opacity-50', 'opacity-100');
-                document.getElementById('main-nav').classList.remove('hidden');
-            } else {
-                document.getElementById('main-nav').classList.add('hidden');
-                // Saat masuk mode TV, wajib putar video mute lepas
+        function suaraPanggilTV(prefix, num) {
+            const video = document.getElementById('tv-video-player');
+            if (video && !video.muted) {
+                savedVideoVolume = video.volume;
+                video.volume = 0.1; // Turunkan volume video saat memanggil
+            }
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const formattedNumStr = num.toString().padStart(3, '0');
+                const spellLetters = prefix + ' ' + formattedNumStr.split('').map(d => d === '0' ? 'kosong' : d).join(' ');
+                
+                const utterance = new SpeechSynthesisUtterance(`Nomor antrean, ${spellLetters}, silahkan ke, ${categories[queueState.lastCalled.poliKey].name}`);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.85;
+
+                const restoreVolume = () => { if (video && !video.muted) video.volume = savedVideoVolume; };
+                utterance.onend = restoreVolume;
+                utterance.onerror = restoreVolume;
+                
+                window.speechSynthesis.speak(utterance);
+                
+                // Backup restore volume jika onend tidak terpanggil di beberapa browser
+                setTimeout(restoreVolume, 8000);
+            }
+        }
+
+        function startTVMode() {
+            document.getElementById('tv-start-audio').classList.add('hidden');
+            isTVModeActive = true;
+            const vid = document.getElementById('tv-video-player');
+            if(vid) vid.play().catch(e => console.log("Auto-play terblokir", e));
+        }
+
+        function toggleVideoMute() {
+            queueState.videoMuted = !queueState.videoMuted;
+            saveToCloud(); // Sync mute ke semua perangkat TV
+        }
+
+        function setVideoVolume(val) {
+            queueState.videoVolume = val;
+            saveToCloud(); // Sync volume ke semua perangkat TV
+        }
+
+        function gantiVideoTV(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const vidURL = URL.createObjectURL(file);
                 const vid = document.getElementById('tv-video-player');
-                if(vid) { vid.muted = false; vid.play(); }
+                if(vid) { vid.src = vidURL; vid.play(); }
             }
-            
-            currentViewMode = viewName;
-            renderAllViews();
-        };
+        }
 
-        window.bukaKonfirmasiReset = () => document.getElementById('reset-confirm-modal').classList.remove('hidden');
+        // --- MODAL UTILS ---
+        function bukaPetunjukPrinter() { document.getElementById('printer-guide-modal').classList.remove('hidden'); }
+        function tutupPetunjukPrinter() { document.getElementById('printer-guide-modal').classList.add('hidden'); }
+        function closeReceiptModal() { document.getElementById('receipt-modal').classList.add('hidden'); }
+        function bukaKonfirmasiReset() { document.getElementById('reset-confirm-modal').classList.remove('hidden'); }
+        function tutupKonfirmasiReset() { document.getElementById('reset-confirm-modal').classList.add('hidden'); }
         
-        window.eksekusiResetAntrian = async () => {
-            try {
-                await setDoc(docRef, {
-                    globalCounter: 0,
-                    activeCalling: { DEWASA: "---", ANAK: "---", KIA: "---", KB: "---", GIGI: "---", KONSELING: "---", IGD: "---" },
-                    history: [],
-                    lastCalled: null
-                });
-                document.getElementById('reset-confirm-modal').classList.add('hidden');
-                showToast("Berhasil mereset seluruh antrean hari ini.", "success");
-            } catch (e) {
-                showToast("Gagal mereset data.", "warning");
-            }
-        };
-
-        // Jam Realtime
-        setInterval(() => {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            if(document.getElementById('kiosk-live-time')) document.getElementById('kiosk-live-time').innerText = timeStr;
-            if(document.getElementById('tv-live-time')) document.getElementById('tv-live-time').innerText = timeStr;
-        }, 1000);
-
-        // START APLIKASI (Mulai di tab Admin sebagai default)
-        switchView('admin');
-        initApp();
-
+        function eksekusiResetAntrian() {
+            queueState = {
+                globalCounter: 0,
+                activeCalling: { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
+                history: [],
+                lastCalled: { id: null, ticket: null, poli: null, prefix: null, num: null, timestamp: null },
+                videoVolume: queueState.videoVolume,
+                videoMuted: queueState.videoMuted
+            };
+            saveToCloud(); // Sinkron reset ke semua perangkat
+            tutupKonfirmasiReset();
+        }
     </script>
 </body>
 </html>
-```eof
-
-### Apa saja perubahan kunci yang menyembuhkan "Penyakit" Sinkronisasinya?
-
-1. **Perubahan Arsitektur Database (Crucial):** Di kode lama, tombol Admin menggunakan `saveState()` yang meng-upload/menimpa keseluruhan data aplikasi secara mentah. Ini menyebabkan *Race Condition* di mana panel menolak pembaruan data dari Kiosk. Saya menggantinya agar menggunakan fungsi `runTransaction` baik saat tablet mengambil nomor **maupun** saat Admin menekan tombol panggil.
-2. **Penghapusan Local Storage Fallback:** Sebelumnya jika koneksi ke Firestore sedikit error, kode diam-diam melempar pengguna ke penyimpanan lokal perangkat (*offline mode*). Akibatnya tablet mencetak tiket sendiri, dan admin berdiri sendiri di datanya sendiri. Sekarang aplikasi akan "memaksa" komunikasi lewat Cloud.
-3. **Notifikasi *Toast* Dinamis:** Saat tablet (Kiosk) di ruangan depan menekan tombol ambil nomor antrean, kini otomatis muncul *Toast* kecil berwarna hijau di layar komputer (Admin Panel) di belakang berbunyi **"Ada Pasien Baru Mengambil Tiket!"**, dan angka sisa antrean langsung bertambah secara *real-time*.
-
-### ⚠️ PERINGATAN PENTING SOAL FIREBASE (Wajib Dibaca)
-Karena Anda menggunakan sinkronisasi Cloud, pastikan **Aturan Keamanan (Security Rules)** di Firestore Database Anda mengizinkan penulisan. 
-Jika belum, masuk ke Firebase Console -> Firestore Database -> Tab **Rules**, lalu tempel ini:
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
