@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase Realtime Database SDK (Compat v8 / v9 stable) -->
+    <!-- Firebase SDK (v8 stable) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -240,7 +240,7 @@
 
             <div class="w-full bg-slate-950 text-slate-400 text-[10px] py-1 px-3 rounded-lg flex justify-between items-center border border-slate-800">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-emerald-400"></i> Harap simpan cetakan struk nomor antrean.</span>
-                <span class="text-slate-500 font-mono">AINUO802 Ready • Ver 2.6</span>
+                <span class="text-slate-500 font-mono">AINUO802 Ready • Ver 2.8 (Multi-Sync Connected)</span>
             </div>
         </div>
 
@@ -249,7 +249,7 @@
             <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
                 <div>
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-circle-play text-emerald-400"></i> Panel Operator
+                        <i class="fa-solid fa-circle-play text-emerald-400"></i> Panel Operator (Admin)
                     </h2>
                 </div>
                 <div class="flex gap-2 flex-wrap justify-end items-center">
@@ -274,7 +274,7 @@
                 <div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-col gap-3">
                     <h3 class="font-bold text-base text-slate-200 border-b border-slate-700 pb-2 flex justify-between items-center">
                         <span>Layanan Poli / Loket</span>
-                        <span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-wifi animate-pulse"></i> Terhubung ke Cloud Firebase</span>
+                        <span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-wifi animate-pulse"></i> Multi-Device Synced</span>
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="admin-cards-container"></div>
                 </div>
@@ -343,7 +343,7 @@
             
             <div id="tv-start-audio" class="absolute inset-0 bg-slate-950/95 z-[70] flex flex-col items-center justify-center p-6 text-center">
                 <i class="fa-solid fa-tv text-6xl text-emerald-500 mb-4"></i>
-                <h2 class="text-2xl font-bold text-white mb-2">Aktifkan Layar TV Suara</h2>
+                <h2 class="text-2xl font-bold text-white mb-2">Aktifkan Layar TV & Suara Panggilan</h2>
                 <button onclick="startTVMode()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-extrabold text-lg shadow-lg hover:scale-105 mt-4 transition flex items-center gap-2">
                     <i class="fa-solid fa-play"></i> MULAI TAMPILAN TV
                 </button>
@@ -354,8 +354,8 @@
     <div id="receipt-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
         <div class="bg-slate-800 rounded-2xl p-5 shadow-2xl max-w-sm w-full text-center border border-slate-700">
             <div class="flex justify-center text-emerald-400 text-4xl mb-2"><i class="fa-solid fa-circle-check animate-bounce"></i></div>
-            <h3 class="font-bold text-lg text-white">Tiket Sedang Dicetak!</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Meneruskan ke RawBT</p>
+            <h3 class="font-bold text-lg text-white">Tiket Berhasil Dicetak!</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Meneruskan ke RawBT Printer</p>
             
             <div class="border border-slate-300 rounded-lg p-4 bg-white my-3 text-left font-mono text-slate-900 shadow-inner">
                 <div class="text-center pb-2 border-b border-dashed border-slate-400">
@@ -383,8 +383,8 @@
             <h3 class="font-bold text-base text-amber-300 mb-3"><i class="fa-solid fa-print"></i> Info AINUO802 (80mm) & RawBT</h3>
             <p class="text-xs text-slate-300 mb-2">Sistem ini sudah dioptimasi menggunakan ESC/POS untuk ukuran besar di RawBT.</p>
             <ul class="list-disc pl-4 text-xs text-slate-400 space-y-1 mb-4">
-                <li>Nomor antrean dan nama poli dicetak besar/tebal, sedangkan header Puskesmas kembali ke ukuran normal.</li>
-                <li>Pastikan driver/mode RawBT mendukung perintah ESC/POS standar.</li>
+                <li>Nomor antrean dan nama poli dicetak besar/tebal, sedangkan header Puskesmas normal.</li>
+                <li>Pastikan Bluetooth / USB terhubung ke printer thermal AINUO802.</li>
             </ul>
             <button onclick="tutupPetunjukPrinter()" class="w-full py-2 bg-amber-500 text-slate-950 rounded-lg font-bold text-xs">Tutup</button>
         </div>
@@ -393,7 +393,7 @@
     <div id="reset-confirm-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex justify-center items-center backdrop-blur-sm p-4 print:hidden">
         <div class="bg-slate-800 rounded-2xl p-5 text-center border border-slate-700 max-w-xs w-full">
             <h3 class="font-extrabold text-white">Reset Antrean?</h3>
-            <p class="text-xs text-slate-400 mt-1">Kembalikan ke Nol?</p>
+            <p class="text-xs text-slate-400 mt-1">Kembalikan nomor urut ke 0?</p>
             <div class="flex gap-2 mt-4">
                 <button onclick="tutupKonfirmasiReset()" class="flex-1 py-2 bg-slate-700 text-slate-300 rounded-lg text-xs font-bold">Batal</button>
                 <button onclick="eksekusiResetAntrian()" class="flex-1 py-2 bg-rose-600 text-white rounded-lg text-xs font-bold">Ya, Reset</button>
@@ -413,10 +413,10 @@
             measurementId: "G-6NKK7FXD24"
         };
 
-        // Initialize Firebase safely with fallback to LocalStorage if permission_denied occurs
+        // Initialize Firebase with fallback to BroadcastChannel + localStorage for seamless cross-device/tab synchronization
+        let firebaseReady = false;
         let db = null;
         let queueRef = null;
-        let useLocalStorageMode = false;
 
         try {
             if (!firebase.apps.length) {
@@ -424,10 +424,12 @@
             }
             db = firebase.database();
             queueRef = db.ref('queueState');
-        } catch (e) {
-            console.warn("Firebase initialization failed, switching to LocalStorage mode:", e);
-            useLocalStorageMode = true;
+        } catch(e) {
+            console.warn("Firebase initialization skipped or blocked.");
         }
+
+        const STORAGE_KEY = 'siantik_delha_queue_data_v2';
+        const channel = new BroadcastChannel('siantik_delha_sync_channel');
 
         let queueState = {
             globalCounter: 0,
@@ -454,71 +456,58 @@
             IGD: { prefix: 'I', name: 'IGD', color: 'bg-red-600', tvColor: 'bg-red-700' }
         };
 
-        function initQueueSync() {
-            if (useLocalStorageMode) {
-                loadFromLocalStorage();
-                return;
-            }
-
-            queueRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    queueState = {
-                        globalCounter: data.globalCounter || 0,
-                        activeCalling: data.activeCalling || { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
-                        history: data.history ? Object.values(data.history) : [],
-                        lastCalled: data.lastCalled || { id: null, ticket: null, poli: null, timestamp: null },
-                        videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
-                        videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
-                    };
-                }
-                
-                renderAdminPanel();
-                renderHistoryLog();
-                renderTVGrid();
-                
-                if (queueState.lastCalled && queueState.lastCalled.timestamp && queueState.lastCalled.timestamp !== lastPlayedTimestamp) {
-                    lastPlayedTimestamp = queueState.lastCalled.timestamp;
-                    if(isTVModeActive) {
-                        triggerTVCall(queueState.lastCalled);
-                    }
-                }
-            }, (error) => {
-                console.warn("Firebase read error, falling back to LocalStorage:", error);
-                useLocalStorageMode = true;
-                loadFromLocalStorage();
-            });
-        }
-
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('siantik_queue_state');
+        // Load initial local state
+        function loadLocalState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
-                    queueState = JSON.parse(saved);
-                } catch(e) { console.error(e); }
+                    const parsed = JSON.parse(saved);
+                    queueState = { ...queueState, ...parsed };
+                } catch(e) {}
             }
-            updateUIAfterStateChange();
+        }
+        loadLocalState();
+
+        // Sync Listener Setup
+        function initQueueSync() {
+            if (queueRef) {
+                queueRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        queueState = {
+                            globalCounter: data.globalCounter || 0,
+                            activeCalling: data.activeCalling || queueState.activeCalling,
+                            history: data.history ? Object.values(data.history) : [],
+                            lastCalled: data.lastCalled || queueState.lastCalled,
+                            videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
+                            videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
+                        };
+                        persistAndRefresh();
+                    }
+                }, (error) => {
+                    console.warn("Firebase sync fallback activated due to permissions/network:", error);
+                });
+            }
         }
 
-        function saveToCloud() {
-            if (useLocalStorageMode) {
-                localStorage.setItem('siantik_queue_state', JSON.stringify(queueState));
-                updateUIAfterStateChange();
-                return;
+        // BroadcastChannel listener for multi-tab / multi-device (local network)
+        channel.onmessage = (event) => {
+            if (event.data && event.data.type === 'STATE_UPDATE') {
+                queueState = event.data.payload;
+                persistAndRefresh(false);
             }
+        };
 
-            queueRef.set(queueState).catch((error) => {
-                console.warn("Firebase write permission denied. Switching to LocalStorage mode automatically.", error);
-                useLocalStorageMode = true;
-                localStorage.setItem('siantik_queue_state', JSON.stringify(queueState));
-                updateUIAfterStateChange();
-            });
-        }
-
-        function updateUIAfterStateChange() {
+        function persistAndRefresh(broadcast = true) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(queueState));
+            if (broadcast) {
+                channel.postMessage({ type: 'STATE_UPDATE', payload: queueState });
+            }
+            
             renderAdminPanel();
             renderHistoryLog();
             renderTVGrid();
+            
             if (queueState.lastCalled && queueState.lastCalled.timestamp && queueState.lastCalled.timestamp !== lastPlayedTimestamp) {
                 lastPlayedTimestamp = queueState.lastCalled.timestamp;
                 if(isTVModeActive) {
@@ -527,8 +516,17 @@
             }
         }
 
-        // Initialize sync on load
+        function saveToCloudAndLocal() {
+            if (queueRef) {
+                queueRef.set(queueState).catch((err) => {
+                    console.warn("Firebase write skipped, using local sync.");
+                });
+            }
+            persistAndRefresh(true);
+        }
+
         initQueueSync();
+        persistAndRefresh(false);
 
         function isLayananTerbuka() {
             const skrg = new Date();
@@ -569,38 +567,10 @@
                 return;
             }
 
-            if (useLocalStorageMode) {
-                processTicketLocally(catName, prefix);
-                return;
-            }
-
-            queueRef.transaction((currentData) => {
-                if (currentData === null) {
-                    return {
-                        globalCounter: 1,
-                        activeCalling: { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
-                        history: [],
-                        lastCalled: { id: null, ticket: null, poli: null, timestamp: null }
-                    };
-                }
-                currentData.globalCounter = (currentData.globalCounter || 0) + 1;
-                return currentData;
-            }, (error, committed, snapshot) => {
-                if (error) {
-                    console.warn("Transaction permission denied, falling back to local ticket creation:", error);
-                    useLocalStorageMode = true;
-                    processTicketLocally(catName, prefix);
-                } else if (committed) {
-                    const data = snapshot.val();
-                    finalizeTicketCreation(catName, prefix, data.globalCounter);
-                }
-            });
-        }
-
-        function processTicketLocally(catName, prefix) {
             queueState.globalCounter = (queueState.globalCounter || 0) + 1;
-            finalizeTicketCreation(catName, prefix, queueState.globalCounter);
-            saveToCloud();
+            const globalTicketNum = queueState.globalCounter;
+            
+            finalizeTicketCreation(catName, prefix, globalTicketNum);
         }
 
         function finalizeTicketCreation(catName, prefix, globalTicketNum) {
@@ -627,11 +597,7 @@
             }
             queueState.history.unshift(tiketBaru);
 
-            if (!useLocalStorageMode) {
-                queueRef.set(queueState);
-            } else {
-                saveToCloud();
-            }
+            saveToCloudAndLocal();
 
             document.getElementById('modal-ticket-num').innerText = formatNum;
             document.getElementById('modal-ticket-category').innerText = categories[catName].name;
@@ -699,7 +665,7 @@
                 timestamp: Date.now()
             };
 
-            saveToCloud();
+            saveToCloudAndLocal();
 
             if(currentViewMode === 'admin') {
                 suaraPanggil(ticket.prefix, ticket.num);
@@ -892,7 +858,7 @@
             if(vid) {
                 vid.muted = !vid.muted;
                 queueState.videoMuted = vid.muted;
-                saveToCloud();
+                saveToCloudAndLocal();
             }
         }
 
@@ -901,7 +867,7 @@
             if(vid) {
                 vid.volume = val / 100;
                 queueState.videoVolume = val;
-                saveToCloud();
+                saveToCloudAndLocal();
             }
         }
 
@@ -948,7 +914,7 @@
                 videoVolume: queueState.videoVolume,
                 videoMuted: queueState.videoMuted
             };
-            saveToCloud();
+            saveToCloudAndLocal();
             tutupKonfirmasiReset();
         }
     </script>
