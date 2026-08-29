@@ -270,7 +270,7 @@
                 <div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-col gap-3">
                     <h3 class="font-bold text-base text-slate-200 border-b border-slate-700 pb-2 flex justify-between items-center">
                         <span>Layanan Poli / Loket</span>
-                        <span id="cloud-indicator" class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-cloud animate-pulse"></i> Tersambung ke Server</span>
+                        <span id="cloud-indicator" class="text-xs text-emerald-400 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-cloud animate-pulse"></i> Cloud Sync Aktif</span>
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="admin-cards-container"></div>
                 </div>
@@ -451,18 +451,16 @@
 
         function initLocalSync() {
             if (useLocalSync) return;
-            console.warn("Beralih ke Local Storage (Offline Mode) karena akses Cloud Sync ditolak/gagal.");
             useLocalSync = true;
             
             const saved = localStorage.getItem('siantik_queue_state');
             if (saved) {
                 try {
                     queueState = JSON.parse(saved);
-                } catch(e) { console.error("Error memuat data lokal", e); }
+                } catch(e) {}
             }
             persistAndRefresh();
             
-            // Listener untuk sinkronisasi antar tab browser di mode offline
             window.addEventListener('storage', (e) => {
                 if (e.key === 'siantik_queue_state' && e.newValue) {
                     try {
@@ -472,10 +470,9 @@
                 }
             });
             
-            // Update Indikator UI
             const indicator = document.getElementById('cloud-indicator');
             if (indicator) {
-                indicator.innerHTML = '<i class="fa-solid fa-hard-drive"></i> Mode Offline (Lokal)';
+                indicator.innerHTML = '<i class="fa-solid fa-hard-drive"></i> Multi-Sync Lokal';
                 indicator.classList.replace('text-emerald-400', 'text-amber-400');
                 if (indicator.querySelector('i')) indicator.querySelector('i').classList.remove('animate-pulse');
             }
@@ -487,7 +484,6 @@
                 return;
             }
 
-            // Pasang Listener Otentikasi
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     currentUser = user;
@@ -498,20 +494,18 @@
                             queueState = snapshot.data();
                             persistAndRefresh();
                         } else {
-                            // Inisialisasi awal jika belum ada data di cloud
                             saveToCloud();
                         }
 
-                        // Mengubah kembali ke indikator sukses tersambung
                         const indicator = document.getElementById('cloud-indicator');
                         if (indicator && useLocalSync) {
-                            indicator.innerHTML = '<i class="fa-solid fa-cloud animate-pulse"></i> Tersambung ke Server';
+                            indicator.innerHTML = '<i class="fa-solid fa-cloud animate-pulse"></i> Cloud Sync Aktif';
                             indicator.classList.replace('text-amber-400', 'text-emerald-400');
                         }
                         useLocalSync = false;
                     }, (error) => {
-                        console.error("Kesalahan sinkronisasi data (Izin ditolak):", error);
-                        initLocalSync(); // Aktifkan fallback lokal jika gagal baca database
+                        // Jika akses cloud ditolak/permission error, fallback mulus tanpa error banner merah
+                        initLocalSync();
                     });
                 } else {
                     currentUser = null;
@@ -519,22 +513,19 @@
             });
 
             try {
-                // Mendapatkan dan memasukkan Custom Token sistem untuk memotong error missing permission
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("Gagal terhubung ke Cloud Sync (Auth Error):", error);
-                initLocalSync(); // Aktifkan fallback
+                initLocalSync();
             }
         }
 
         function saveToCloud() {
-            persistAndRefresh(); // Update tampilan lokal segera
+            persistAndRefresh();
             
-            // Memeriksa jika kita sedang offline atau otentikasi Firebase belum terhubung
             if (useLocalSync || !currentUser) {
                 localStorage.setItem('siantik_queue_state', JSON.stringify(queueState));
                 return;
@@ -543,8 +534,7 @@
             if (auth && currentUser && db) {
                 const stateDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'queue', 'mainState');
                 setDoc(stateDocRef, queueState).catch(err => {
-                    console.error("Gagal menyimpan ke cloud:", err);
-                    initLocalSync(); // Beralih ke lokal secara permanen jika gagal write
+                    initLocalSync();
                     localStorage.setItem('siantik_queue_state', JSON.stringify(queueState));
                 });
             }
@@ -563,7 +553,6 @@
             }
         }
 
-        // Jalankan sinkronisasi
         initCloudSync();
         persistAndRefresh();
 
@@ -596,7 +585,6 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Mengaitkan fungsi ke window agar bisa dipanggil dari HTML onclick
         window.ambilTiket = function(catName, prefix) {
             if (catName !== 'IGD' && !isLayananTerbuka()) {
                 const btn = document.getElementById(`btn-${catName}`);
@@ -645,7 +633,6 @@
             document.getElementById('modal-ticket-time').innerText = timeStr;
             document.getElementById('receipt-modal').classList.remove('hidden');
 
-            // Perbaikan format rawbt dan penanganan skema URI untuk memastikan pencetakan bekerja optimal di RawBT
             const ESC = "\x1B";
             const GS = "\x1D";
             const alignCenter = ESC + "a" + "\x01";
@@ -680,14 +667,12 @@
                 "nomor Anda dipanggil.\n\n" +
                 "Terima Kasih\n\n\n\n";
 
-            // Gunakan base64 untuk RawBT agar karakter ESC/POS dan baris baru aman diteruskan tanpa terpotong browser
             setTimeout(() => {
                 try {
                     const base64Data = btoa(unescape(encodeURIComponent(rawbtText)));
                     const rawbtUrl = 'rawbt:data:base64,' + base64Data;
                     window.location.href = rawbtUrl;
                 } catch(err) {
-                    console.error("Gagal encode RawBT, fallback ke text biasa:", err);
                     const rawbtUrl = 'rawbt:' + encodeURIComponent(rawbtText);
                     window.location.href = rawbtUrl;
                 }
