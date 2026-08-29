@@ -413,7 +413,7 @@
             measurementId: "G-6NKK7FXD24"
         };
 
-        // Initialize Firebase with fallback to BroadcastChannel + localStorage for seamless cross-device/tab synchronization
+        // Initialize Firebase with robust Realtime Database synchronization
         let firebaseReady = false;
         let db = null;
         let queueRef = null;
@@ -423,13 +423,13 @@
                 firebase.initializeApp(firebaseConfig);
             }
             db = firebase.database();
-            queueRef = db.ref('queueState');
+            queueRef = db.ref('queueState_v3');
         } catch(e) {
             console.warn("Firebase initialization skipped or blocked.");
         }
 
-        const STORAGE_KEY = 'siantik_delha_queue_data_v2';
-        const channel = new BroadcastChannel('siantik_delha_sync_channel');
+        const STORAGE_KEY = 'siantik_delha_queue_data_v3';
+        const channel = new BroadcastChannel('siantik_delha_sync_channel_v3');
 
         let queueState = {
             globalCounter: 0,
@@ -468,9 +468,10 @@
         }
         loadLocalState();
 
-        // Sync Listener Setup
+        // Sync Listener Setup with Realtime Polling Fallback for Maximum Reliability
         function initQueueSync() {
             if (queueRef) {
+                // Realtime Firebase Listener
                 queueRef.on('value', (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
@@ -482,21 +483,52 @@
                             videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
                             videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
                         };
-                        persistAndRefresh();
+                        persistAndRefresh(false);
                     }
                 }, (error) => {
-                    console.warn("Firebase sync fallback activated due to permissions/network:", error);
+                    console.warn("Firebase sync fallback activated:", error);
                 });
+
+                // Periodic cloud poll to guarantee instant cross-device updates even on strict network firewalls
+                setInterval(() => {
+                    queueRef.once('value').then((snapshot) => {
+                        const data = snapshot.val();
+                        if (data && data.globalCounter !== undefined) {
+                            const remoteTimestamp = data.lastCalled ? data.lastCalled.timestamp : 0;
+                            const localTimestamp = queueState.lastCalled ? queueState.lastCalled.timestamp : 0;
+                            if (data.globalCounter !== queueState.globalCounter || remoteTimestamp !== localTimestamp) {
+                                queueState = {
+                                    globalCounter: data.globalCounter || 0,
+                                    activeCalling: data.activeCalling || queueState.activeCalling,
+                                    history: data.history ? Object.values(data.history) : [],
+                                    lastCalled: data.lastCalled || queueState.lastCalled,
+                                    videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
+                                    videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
+                                };
+                                persistAndRefresh(false);
+                            }
+                        }
+                    }).catch(() => {});
+                }, 1500);
             }
         }
 
-        // BroadcastChannel listener for multi-tab / multi-device (local network)
+        // BroadcastChannel listener for multi-tab / local network
         channel.onmessage = (event) => {
             if (event.data && event.data.type === 'STATE_UPDATE') {
                 queueState = event.data.payload;
                 persistAndRefresh(false);
             }
         };
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === STORAGE_KEY && event.newValue) {
+                try {
+                    queueState = JSON.parse(event.newValue);
+                    persistAndRefresh(false);
+                } catch(e){}
+            }
+        });
 
         function persistAndRefresh(broadcast = true) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(queueState));
@@ -519,7 +551,7 @@
         function saveToCloudAndLocal() {
             if (queueRef) {
                 queueRef.set(queueState).catch((err) => {
-                    console.warn("Firebase write skipped, using local sync.");
+                    console.warn("Firebase write warning:", err);
                 });
             }
             persistAndRefresh(true);
