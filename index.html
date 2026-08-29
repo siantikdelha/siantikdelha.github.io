@@ -10,10 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase Realtime Database SDK (Compat v8 / v9 stable) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
@@ -104,17 +100,20 @@
         </div>
         
         <div class="flex gap-1.5 items-center">
+            <span id="koneksi-status" class="hidden sm:flex items-center gap-1 text-[10px] font-bold text-slate-400 mr-2 bg-slate-800 px-2 py-1 rounded">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Menghubungkan...
+            </span>
             <button onclick="bukaPetunjukPrinter()" class="px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold text-[10px] md:text-xs flex items-center gap-1 transition">
-                <i class="fa-solid fa-print"></i> <span class="hidden sm:inline">Seting Printer 80mm</span>
+                <i class="fa-solid fa-print"></i> <span class="hidden sm:inline">Seting Printer</span>
             </button>
             <button onclick="switchView('kiosk')" id="nav-kiosk" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] md:text-xs flex items-center gap-1 shadow-sm">
                 <i class="fa-solid fa-tablet-screen-button"></i> Pasien
             </button>
             <button onclick="switchView('admin')" id="nav-admin" class="px-3 py-1.5 rounded-lg bg-slate-700 text-slate-200 font-bold text-[10px] md:text-xs flex items-center gap-1 hover:bg-slate-600 transition">
-                <i class="fa-solid fa-sliders"></i> Panel Operator
+                <i class="fa-solid fa-sliders"></i> Panel
             </button>
             <button onclick="switchView('tv')" id="nav-tv" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white font-bold text-[10px] md:text-xs flex items-center gap-1 shadow-sm hover:bg-teal-500 transition">
-                <i class="fa-solid fa-tv"></i> Layar TV
+                <i class="fa-solid fa-tv"></i> TV
             </button>
         </div>
     </nav>
@@ -135,7 +134,7 @@
                     </div>
                     <div>
                         <h1 class="text-white text-lg md:text-2xl font-black uppercase tracking-wider leading-none">SIANTIK DELHA</h1>
-                        <p class="text-emerald-300 text-[9px] md:text-[10px] font-bold tracking-widest mt-0.5 uppercase">SILAHKAN SENTUH TOMBOL POLI DI BAWAH UNTUK MENGAMBIL NOMOR ANTREAN</p>
+                        <p class="text-emerald-300 text-[9px] md:text-[10px] font-bold tracking-widest mt-0.5 uppercase">SILAHKAN SENTUH TOMBOL POLI DI BAWAH</p>
                     </div>
                 </div>
 
@@ -157,9 +156,9 @@
                     <span class="uppercase text-[9px] md:text-[11px]">Jam Pelayanan Loket:</span>
                 </div>
                 <div class="flex gap-2">
-                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Senin - Kamis: 07.00 - 11.00</span>
-                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Jumat: 07.00 - 10.00</span>
-                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Sabtu: 07.00 - 11.00</span>
+                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Senin-Kamis: 07.00-11.00</span>
+                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Jumat: 07.00-10.00</span>
+                    <span class="bg-slate-700/80 px-2 py-0.5 rounded border border-slate-600">Sabtu: 07.00-11.00</span>
                     <span class="bg-red-900/80 text-red-200 px-2 py-0.5 rounded border border-red-700 font-bold flex items-center gap-1">
                         <i class="fa-solid fa-truck-medical animate-pulse text-[9px]"></i> IGD: 24 JAM
                     </span>
@@ -240,7 +239,7 @@
 
             <div class="w-full bg-slate-950 text-slate-400 text-[10px] py-1 px-3 rounded-lg flex justify-between items-center border border-slate-800">
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-emerald-400"></i> Harap simpan cetakan struk nomor antrean.</span>
-                <span class="text-slate-500 font-mono">AINUO802 Ready • Ver 2.6</span>
+                <span class="text-slate-500 font-mono">Ver 3.0 • Cloud Sync</span>
             </div>
         </div>
 
@@ -274,14 +273,14 @@
                 <div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-col gap-3">
                     <h3 class="font-bold text-base text-slate-200 border-b border-slate-700 pb-2 flex justify-between items-center">
                         <span>Layanan Poli / Loket</span>
-                        <span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-wifi animate-pulse"></i> Terhubung ke Cloud Firebase</span>
+                        <span id="admin-koneksi" class="text-xs text-amber-400 font-semibold"><i class="fa-solid fa-wifi"></i> Mengecek Cloud...</span>
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="admin-cards-container"></div>
                 </div>
 
                 <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-col h-[480px]">
                     <h3 class="font-bold text-base text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> Log Tiket (Bisa dipanggil ulang)
+                        <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> Log Tiket
                     </h3>
                     <div class="flex-grow overflow-y-auto pr-1 flex flex-col gap-2" id="history-log"></div>
                 </div>
@@ -401,33 +400,33 @@
         </div>
     </div>
 
-    <script>
-        const firebaseConfig = {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Konfigurasi Anda - Tidak Diubah
+        let config = {
             apiKey: "AIzaSyAhK5GK2vrxirZpPM1JAH3MEQwpeS8SPMg",
             authDomain: "aplikasi-siantik-delha.firebaseapp.com",
-            databaseURL: "https://aplikasi-siantik-delha-default-rtdb.firebaseio.com",
             projectId: "aplikasi-siantik-delha",
             storageBucket: "aplikasi-siantik-delha.firebasestorage.app",
             messagingSenderId: "34647008178",
             appId: "1:34647008178:web:e36dc5184c74e372f3faab",
             measurementId: "G-6NKK7FXD24"
         };
-
-        // Initialize Firebase safely with fallback to LocalStorage if permission_denied occurs
-        let db = null;
-        let queueRef = null;
-        let useLocalStorageMode = false;
-
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            db = firebase.database();
-            queueRef = db.ref('queueState');
-        } catch (e) {
-            console.warn("Firebase initialization failed, switching to LocalStorage mode:", e);
-            useLocalStorageMode = true;
+        
+        // Cek jika ada config dari environment 
+        if (typeof __firebase_config !== 'undefined') {
+            try { config = JSON.parse(__firebase_config); } catch(e){}
         }
+        
+        // Agar tersimpan di public path yang valid untuk sinkronisasi antar perangkat
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'siantik-puskesmas-delha';
+
+        const app = initializeApp(config);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         let queueState = {
             globalCounter: 0,
@@ -438,11 +437,13 @@
             videoMuted: false
         };
 
-        let currentViewMode = 'kiosk'; 
+        let useLocalStorageMode = false;
+        let isFirebaseReady = false;
         let lastPlayedTimestamp = null;
         let isTVModeActive = false;
         let tvCallTimeout = null;
         let savedVideoVolume = 0.5;
+        let currentViewMode = 'kiosk'; 
 
         const categories = {
             DEWASA: { prefix: 'D', name: 'Poli Dewasa', color: 'bg-blue-600', tvColor: 'bg-blue-700' },
@@ -454,71 +455,98 @@
             IGD: { prefix: 'I', name: 'IGD', color: 'bg-red-600', tvColor: 'bg-red-700' }
         };
 
-        function initQueueSync() {
-            if (useLocalStorageMode) {
-                loadFromLocalStorage();
-                return;
-            }
-
-            queueRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    queueState = {
-                        globalCounter: data.globalCounter || 0,
-                        activeCalling: data.activeCalling || { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
-                        history: data.history ? Object.values(data.history) : [],
-                        lastCalled: data.lastCalled || { id: null, ticket: null, poli: null, timestamp: null },
-                        videoVolume: data.videoVolume !== undefined ? data.videoVolume : 50,
-                        videoMuted: data.videoMuted !== undefined ? data.videoMuted : false
-                    };
+        async function initAuthAndData() {
+            try {
+                // WAJIB: Login Anonim sebelum mengakses database agar tidak ditolak (Permission Denied)
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
                 }
-                
-                renderAdminPanel();
-                renderHistoryLog();
-                renderTVGrid();
-                
-                if (queueState.lastCalled && queueState.lastCalled.timestamp && queueState.lastCalled.timestamp !== lastPlayedTimestamp) {
-                    lastPlayedTimestamp = queueState.lastCalled.timestamp;
-                    if(isTVModeActive) {
-                        triggerTVCall(queueState.lastCalled);
-                    }
+                isFirebaseReady = true;
+                setKoneksiStatus('online');
+                initFirestoreSync();
+            } catch (error) {
+                console.error("Autentikasi gagal, beralih ke Mode Offline (Lokal):", error);
+                setKoneksiStatus('offline');
+                useLocalStorageMode = true;
+                loadFromLocalStorage();
+            }
+        }
+
+        function setKoneksiStatus(status) {
+            const el = document.getElementById('koneksi-status');
+            const elAdmin = document.getElementById('admin-koneksi');
+            if(!el || !elAdmin) return;
+            
+            if (status === 'online') {
+                el.innerHTML = '<i class="fa-solid fa-cloud text-emerald-400"></i> <span class="text-emerald-400">Cloud Tersambung</span>';
+                elAdmin.innerHTML = '<i class="fa-solid fa-wifi animate-pulse"></i> Terhubung ke Cloud';
+                elAdmin.className = 'text-xs text-emerald-400 font-semibold';
+            } else {
+                el.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> <span class="text-rose-400">Mode Offline (Lokal)</span>';
+                elAdmin.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Hanya Tersimpan di Perangkat Ini';
+                elAdmin.className = 'text-xs text-rose-400 font-semibold';
+            }
+        }
+
+        function getQueueDocRef() {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'queueData', 'mainState');
+        }
+
+        function initFirestoreSync() {
+            if (!isFirebaseReady) return;
+            
+            const docRef = getQueueDocRef();
+            
+            onSnapshot(docRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    queueState = snapshot.data();
+                    updateUIAfterStateChange();
+                } else {
+                    // Dokumen belum ada, buat baru
+                    setDoc(docRef, queueState).catch(e => console.error("Gagal membuat dokumen awal:", e));
                 }
             }, (error) => {
-                console.warn("Firebase read error, falling back to LocalStorage:", error);
+                console.error("Gagal mendengarkan perubahan Firestore:", error);
+                setKoneksiStatus('offline');
                 useLocalStorageMode = true;
                 loadFromLocalStorage();
             });
         }
 
         function loadFromLocalStorage() {
-            const saved = localStorage.getItem('siantik_queue_state');
+            const saved = localStorage.getItem('siantik_queue_state_v3');
             if (saved) {
-                try {
-                    queueState = JSON.parse(saved);
-                } catch(e) { console.error(e); }
+                try { queueState = JSON.parse(saved); } catch(e) { console.error(e); }
             }
             updateUIAfterStateChange();
         }
 
-        function saveToCloud() {
-            if (useLocalStorageMode) {
-                localStorage.setItem('siantik_queue_state', JSON.stringify(queueState));
+        async function saveState() {
+            if (useLocalStorageMode || !isFirebaseReady) {
+                localStorage.setItem('siantik_queue_state_v3', JSON.stringify(queueState));
                 updateUIAfterStateChange();
                 return;
             }
 
-            queueRef.set(queueState).catch((error) => {
-                console.warn("Firebase write permission denied. Switching to LocalStorage mode automatically.", error);
+            try {
+                await setDoc(getQueueDocRef(), queueState, { merge: true });
+            } catch (error) {
+                console.error("Gagal menyimpan ke Cloud:", error);
+                setKoneksiStatus('offline');
                 useLocalStorageMode = true;
-                localStorage.setItem('siantik_queue_state', JSON.stringify(queueState));
+                localStorage.setItem('siantik_queue_state_v3', JSON.stringify(queueState));
                 updateUIAfterStateChange();
-            });
+            }
         }
 
         function updateUIAfterStateChange() {
             renderAdminPanel();
             renderHistoryLog();
             renderTVGrid();
+            
+            // Cek apakah ada panggilan baru
             if (queueState.lastCalled && queueState.lastCalled.timestamp && queueState.lastCalled.timestamp !== lastPlayedTimestamp) {
                 lastPlayedTimestamp = queueState.lastCalled.timestamp;
                 if(isTVModeActive) {
@@ -526,9 +554,6 @@
                 }
             }
         }
-
-        // Initialize sync on load
-        initQueueSync();
 
         function isLayananTerbuka() {
             const skrg = new Date();
@@ -538,7 +563,7 @@
             if (hari >= 1 && hari <= 4 && jam >= 7 && jam < 11) return true; // Sen-Kam
             if (hari === 5 && jam >= 7 && jam < 10) return true;            // Jum
             if (hari === 6 && jam >= 7 && jam < 11) return true;            // Sab
-            return false;
+            return false; // Minggu atau diluar jam
         }
 
         function updateClock() {
@@ -559,7 +584,8 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        function ambilTiket(catName, prefix) {
+        async function ambilTiket(catName, prefix) {
+            // Cek Jadwal Buka Tutup Poli (Kecuali IGD)
             if (catName !== 'IGD' && !isLayananTerbuka()) {
                 const btn = document.getElementById(`btn-${catName}`);
                 if(btn) {
@@ -569,43 +595,77 @@
                 return;
             }
 
-            if (useLocalStorageMode) {
-                processTicketLocally(catName, prefix);
+            if (useLocalStorageMode || !isFirebaseReady) {
+                // Eksekusi Lokal
+                queueState.globalCounter = (queueState.globalCounter || 0) + 1;
+                cetakDanSimpanTiket(catName, prefix, queueState.globalCounter);
+                saveState();
                 return;
             }
 
-            queueRef.transaction((currentData) => {
-                if (currentData === null) {
-                    return {
-                        globalCounter: 1,
-                        activeCalling: { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
-                        history: [],
-                        lastCalled: { id: null, ticket: null, poli: null, timestamp: null }
+            // Eksekusi Cloud (Transaksi agar tidak bentrok jika ditekan bersamaan di Kiosk berbeda)
+            const docRef = getQueueDocRef();
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const sfDoc = await transaction.get(docRef);
+                    if (!sfDoc.exists()) {
+                        throw "Dokumen antrean belum ada!";
+                    }
+                    
+                    const data = sfDoc.data();
+                    const newCounter = (data.globalCounter || 0) + 1;
+                    
+                    // Buat Objek Tiket
+                    const formatNum = prefix + '-' + newCounter.toString().padStart(3, '0');
+                    const skrg = new Date();
+                    const dateStr = skrg.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const timeStr = skrg.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+                    const tiketBaru = {
+                        id: Date.now() + Math.random(),
+                        category: catName,
+                        prefix: prefix,
+                        num: newCounter,
+                        formatted: formatNum,
+                        date: dateStr,
+                        time: timeStr,
+                        datetimeFull: dateStr + ' ' + timeStr,
+                        status: 'Menunggu'
                     };
-                }
-                currentData.globalCounter = (currentData.globalCounter || 0) + 1;
-                return currentData;
-            }, (error, committed, snapshot) => {
-                if (error) {
-                    console.warn("Transaction permission denied, falling back to local ticket creation:", error);
-                    useLocalStorageMode = true;
-                    processTicketLocally(catName, prefix);
-                } else if (committed) {
-                    const data = snapshot.val();
-                    finalizeTicketCreation(catName, prefix, data.globalCounter);
-                }
-            });
+
+                    let newHistory = data.history ? [...data.history] : [];
+                    newHistory.unshift(tiketBaru); // Tambah ke atas
+
+                    transaction.update(docRef, {
+                        globalCounter: newCounter,
+                        history: newHistory
+                    });
+
+                    // Trigger cetak lokal setelah sukses
+                    cetakDanSimpanTiketLokalSaja(tiketBaru, catName);
+                });
+            } catch (e) {
+                console.error("Transaksi Firebase Gagal, mencoba lokal: ", e);
+                queueState.globalCounter = (queueState.globalCounter || 0) + 1;
+                cetakDanSimpanTiket(catName, prefix, queueState.globalCounter);
+                saveState();
+            }
         }
 
-        function processTicketLocally(catName, prefix) {
-            queueState.globalCounter = (queueState.globalCounter || 0) + 1;
-            finalizeTicketCreation(catName, prefix, queueState.globalCounter);
-            saveToCloud();
+        function cetakDanSimpanTiketLokalSaja(tiketBaru, catName) {
+            // Menampilkan di Modal UI
+            document.getElementById('modal-ticket-num').innerText = tiketBaru.formatted;
+            document.getElementById('modal-ticket-category').innerText = categories[catName].name;
+            document.getElementById('modal-ticket-date').innerText = tiketBaru.date;
+            document.getElementById('modal-ticket-time').innerText = tiketBaru.time;
+            document.getElementById('receipt-modal').classList.remove('hidden');
+
+            // Kirim ke RawBT
+            kirimKeRawBT(tiketBaru.formatted, categories[catName].name, tiketBaru.date, tiketBaru.time);
         }
 
-        function finalizeTicketCreation(catName, prefix, globalTicketNum) {
+        function cetakDanSimpanTiket(catName, prefix, globalTicketNum) {
             const formatNum = prefix + '-' + globalTicketNum.toString().padStart(3, '0');
-            
             const skrg = new Date();
             const dateStr = skrg.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
             const timeStr = skrg.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -622,23 +682,13 @@
                 status: 'Menunggu'
             };
 
-            if (!queueState.history) {
-                queueState.history = [];
-            }
+            if (!queueState.history) queueState.history = [];
             queueState.history.unshift(tiketBaru);
 
-            if (!useLocalStorageMode) {
-                queueRef.set(queueState);
-            } else {
-                saveToCloud();
-            }
+            cetakDanSimpanTiketLokalSaja(tiketBaru, catName);
+        }
 
-            document.getElementById('modal-ticket-num').innerText = formatNum;
-            document.getElementById('modal-ticket-category').innerText = categories[catName].name;
-            document.getElementById('modal-ticket-date').innerText = dateStr;
-            document.getElementById('modal-ticket-time').innerText = timeStr;
-            document.getElementById('receipt-modal').classList.remove('hidden');
-
+        function kirimKeRawBT(formatNum, poliNameStr, dateStr, timeStr) {
             const ESC = "\x1B";
             const GS = "\x1D";
             const alignCenter = ESC + "a" + "\x01";
@@ -650,7 +700,7 @@
             const normalSize = GS + "!" + "\x00";
 
             const lineDivider = "------------------------------------------------";
-            const poliName = categories[catName].name.toUpperCase();
+            const poliName = poliNameStr.toUpperCase();
             
             const rawbtText = 
                 ESC + "@" +
@@ -681,11 +731,13 @@
 
         function panggilLayanan(key, ticketId, isRepeat = false) {
             if (!ticketId) return;
-            const ticket = queueState.history.find(item => item.id == ticketId);
-            if (!ticket) return;
+            const ticketIndex = queueState.history.findIndex(item => item.id == ticketId);
+            if (ticketIndex === -1) return;
+            
+            const ticket = queueState.history[ticketIndex];
 
             if (!isRepeat) {
-                ticket.status = 'Dilayani';
+                queueState.history[ticketIndex].status = 'Dilayani';
                 queueState.activeCalling[key] = ticket.formatted;
             }
 
@@ -699,7 +751,7 @@
                 timestamp: Date.now()
             };
 
-            saveToCloud();
+            saveState(); // Simpan ke Cloud
 
             if(currentViewMode === 'admin') {
                 suaraPanggil(ticket.prefix, ticket.num);
@@ -719,6 +771,7 @@
                 const sisaAntrian = queueState.history.filter(item => item.category === key && item.status === 'Menunggu').length;
 
                 const waitingTickets = queueState.history.filter(item => item.category === key && item.status === 'Menunggu');
+                // Mengambil elemen terakhir di array yang menunggu (karena urutannya di-unshift)
                 const nextTicket = waitingTickets.length > 0 ? waitingTickets[waitingTickets.length - 1] : null; 
                 const nextTicketId = nextTicket ? nextTicket.id : null;
 
@@ -829,7 +882,7 @@
                 utterance.onerror = restoreVolume;
                 
                 window.speechSynthesis.speak(utterance);
-                setTimeout(restoreVolume, 7000);
+                setTimeout(restoreVolume, 7000); // Cadangan jika onend gagal terpanggil
             }
         }
 
@@ -854,7 +907,7 @@
             }, 7000);
         }
 
-        function switchView(viewName) {
+        window.switchView = function(viewName) {
             ['kiosk', 'admin', 'tv'].forEach(v => {
                 const el = document.getElementById(`view-${v}`);
                 if(el) el.classList.add('hidden');
@@ -874,9 +927,9 @@
                 if(nav) nav.classList.remove('hidden');
                 isTVModeActive = false;
             }
-        }
+        };
 
-        function startTVMode() {
+        window.startTVMode = function() {
             const tvAudio = document.getElementById('tv-start-audio');
             if(tvAudio) tvAudio.classList.add('hidden');
             isTVModeActive = true;
@@ -885,27 +938,27 @@
             if(vid) {
                 vid.play().catch(e => console.log("Auto-play terblokir", e));
             }
-        }
+        };
 
-        function toggleVideoMute() {
+        window.toggleVideoMute = function() {
             const vid = document.getElementById('tv-video-player');
             if(vid) {
                 vid.muted = !vid.muted;
                 queueState.videoMuted = vid.muted;
-                saveToCloud();
+                saveState();
             }
-        }
+        };
 
-        function setVideoVolume(val) {
+        window.setVideoVolume = function(val) {
             const vid = document.getElementById('tv-video-player');
             if(vid) {
                 vid.volume = val / 100;
                 queueState.videoVolume = val;
-                saveToCloud();
+                saveState();
             }
-        }
+        };
 
-        function gantiVideoTV(event) {
+        window.gantiVideoTV = function(event) {
             const file = event.target.files[0];
             if(file) {
                 const vidURL = URL.createObjectURL(file);
@@ -915,31 +968,18 @@
                     vid.play();
                 }
             }
-        }
+        };
 
-        function bukaPetunjukPrinter() { 
-            const m = document.getElementById('printer-guide-modal');
-            if(m) m.classList.remove('hidden'); 
-        }
-        function tutupPetunjukPrinter() { 
-            const m = document.getElementById('printer-guide-modal');
-            if(m) m.classList.add('hidden'); 
-        }
-        function closeReceiptModal() { 
-            const m = document.getElementById('receipt-modal');
-            if(m) m.classList.add('hidden'); 
-        }
+        window.ambilTiket = ambilTiket;
+        window.panggilLayanan = panggilLayanan;
         
-        function bukaKonfirmasiReset() { 
-            const m = document.getElementById('reset-confirm-modal');
-            if(m) m.classList.remove('hidden'); 
-        }
-        function tutupKonfirmasiReset() { 
-            const m = document.getElementById('reset-confirm-modal');
-            if(m) m.classList.add('hidden'); 
-        }
+        window.bukaPetunjukPrinter = function() { document.getElementById('printer-guide-modal').classList.remove('hidden'); };
+        window.tutupPetunjukPrinter = function() { document.getElementById('printer-guide-modal').classList.add('hidden'); };
+        window.closeReceiptModal = function() { document.getElementById('receipt-modal').classList.add('hidden'); };
+        window.bukaKonfirmasiReset = function() { document.getElementById('reset-confirm-modal').classList.remove('hidden'); };
+        window.tutupKonfirmasiReset = function() { document.getElementById('reset-confirm-modal').classList.add('hidden'); };
         
-        function eksekusiResetAntrian() {
+        window.eksekusiResetAntrian = function() {
             queueState = {
                 globalCounter: 0,
                 activeCalling: { DEWASA: "Belum Ada", ANAK: "Belum Ada", KIA: "Belum Ada", KB: "Belum Ada", GIGI: "Belum Ada", KONSELING: "Belum Ada", IGD: "Belum Ada" },
@@ -948,9 +988,13 @@
                 videoVolume: queueState.videoVolume,
                 videoMuted: queueState.videoMuted
             };
-            saveToCloud();
+            saveState();
             tutupKonfirmasiReset();
-        }
+        };
+
+        // Memulai aplikasi
+        initAuthAndData();
+
     </script>
 </body>
 </html>
